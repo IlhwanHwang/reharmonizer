@@ -1,0 +1,16 @@
+import instruments.bass
+import instruments.brass
+import instruments.chromatic_percussion
+import instruments.ensemble
+import instruments.ethnic
+import instruments.guitar
+import instruments.organ
+import instruments.percussive
+import instruments.piano
+import instruments.pipe
+import instruments.reed
+import instruments.sound_effects
+import instruments.string
+import instruments.synth_effects
+import instruments.synth_lead
+import instruments.synth_pad

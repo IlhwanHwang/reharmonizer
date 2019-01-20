@@ -331,7 +331,7 @@ AtNote = parameter_graphmaker(_AtNote)
 
 
 def to_midi(
-    singable, scale, velocity_max=127, tick_per_beat=480, instruments=None,
+    singable, velocity_max=127, tick_per_beat=480, instruments=None,
     initial_bpm=144
     ):
     mid = MidiFile()
@@ -342,17 +342,12 @@ def to_midi(
     for key in singable.sing():
         channel = key.channel
 
-        if channel == 9:
-            note = key.note.tone
-        else:
-            note = scale[key.note.tone] + key.note.semitones
-
         velocity = int(key.velocity * velocity_max)
         time_start = int(key.start * tick_per_beat)
         time_end = int((key.start + key.length) * tick_per_beat)
         
-        messages.append(Message('note_on', note=note, velocity=velocity, time=time_start, channel=channel))
-        messages.append(Message('note_off', note=note, velocity=velocity, time=time_end, channel=channel))
+        messages.append(Message('note_on', note=key.note.midi_number(), velocity=velocity, time=time_start, channel=channel))
+        messages.append(Message('note_off', note=key.note.midi_number(), velocity=velocity, time=time_end, channel=channel))
     
     track.append(MetaMessage('set_tempo', tempo=bpm2tempo(initial_bpm)))
 

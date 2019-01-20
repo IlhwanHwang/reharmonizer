@@ -1,14 +1,16 @@
 import re
 
 class Interval:
-    def __init__(self, notation=None, number=None, quality=None):
+    def __init__(self, notation=None, number=None, quality=None, inverted=False):
         if notation:
             # TODO: add notation syntax check
-            number = int(re.sub('[^0-9]', '', notation))
+            _, inverted, quality, number = re.match(r'(-)?(M|m|A|AA|d|dd|P)(\d+)', notation).groups()
+            number = int(number)
             quality = re.sub('[0-9]', '', notation)
         
         self.number = number
         self.quality = quality
+        self.inverted = inverted
 
     def is_potentially_perfect(self):
         corrected_number = ((self.number - 1) % 7) + 1
@@ -18,22 +20,25 @@ class Interval:
         if self.is_potentially_perfect():
             order_perfect = ['dd', 'd', 'P', 'A', 'AA']
             # TODO: add out of range exception
-            return Interval(number=self.number, quality=order_perfect[order_perfect.index(self.quality) + 1])
+            return Interval(number=self.number, quality=order_perfect[order_perfect.index(self.quality) + 1], inverted=self.inverted)
         else:
             order_major = ['dd', 'd', 'm', 'M', 'A', 'AA']
             # TODO: add out of range exception
-            return Interval(number=self.number, quality=order_major[order_major.index(self.quality) + 1])
+            return Interval(number=self.number, quality=order_major[order_major.index(self.quality) + 1], inverted=self.inverted)
 
     def diminish(self):
         if self.is_potentially_perfect():
             order_perfect = ['dd', 'd', 'P', 'A', 'AA']
             # TODO: add out of range exception
-            return Interval(number=self.number, quality=order_perfect[order_perfect.index(self.quality) - 1])
+            return Interval(number=self.number, quality=order_perfect[order_perfect.index(self.quality) - 1], inverted=self.inverted)
         else:
             order_major = ['dd', 'd', 'm', 'M', 'A', 'AA']
             # TODO: add out of range exception
-            return Interval(number=self.number, quality=order_major[order_major.index(self.quality) - 1])
+            return Interval(number=self.number, quality=order_major[order_major.index(self.quality) - 1], inverted=self.inverted)
     
+    def invert(self):
+        return Interval(number=self.number, quality=self.quality, inverted=~self.inverted)
+
     def __str__(self):
         return self.quality + str(self.number)
     
@@ -136,17 +141,31 @@ class Note:
 
     def __add__(self, other):
         if isinstance(other, Interval):
-            tone_index_self = Note._tone_to_index(self.tone) + self.octave * 7
-            tone_index_other = other.number - 1
-            tone_index_result = tone_index_self + tone_index_other
-            tone_result = Note._index_to_tone(tone_index_result)
-            octave_result = tone_index_result // 7
+            if not other.inverted:
+                tone_index_self = Note._tone_to_index(self.tone) + self.octave * 7
+                tone_index_other = other.number - 1
+                tone_index_result = tone_index_self + tone_index_other
+                tone_result = Note._index_to_tone(tone_index_result)
+                octave_result = tone_index_result // 7
 
-            note_neutral = Note(octave=octave_result, tone=tone_result, semitones=0)
-            semitones_interval = other.get_semitones()
-            semitones_neutral = note_neutral.midi_number() - self.midi_number()
+                note_neutral = Note(octave=octave_result, tone=tone_result, semitones=0)
+                semitones_interval = other.get_semitones()
+                semitones_neutral = note_neutral.midi_number() - self.midi_number()
 
-            return Note(octave=octave_result, tone=tone_result, semitones=semitones_interval - semitones_neutral)
+                return Note(octave=octave_result, tone=tone_result, semitones=semitones_interval - semitones_neutral)
+            
+            else:
+                tone_index_self = Note._tone_to_index(self.tone) + self.octave * 7
+                tone_index_other = other.number - 1
+                tone_index_result = tone_index_self - tone_index_other
+                tone_result = Note._index_to_tone(tone_index_result)
+                octave_result = tone_index_result // 7
+
+                note_neutral = Note(octave=octave_result, tone=tone_result, semitones=0)
+                semitones_interval = other.get_semitones()
+                semitones_neutral = note_neutral.midi_number() - self.midi_number()
+
+                return Note(octave=octave_result, tone=tone_result, semitones=semitones_interval + semitones_neutral)
 
         else:
             raise ValueError('Need to add Interval and Note')
