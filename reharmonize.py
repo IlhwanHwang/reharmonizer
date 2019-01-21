@@ -9,7 +9,7 @@ from math import floor
 
 def _song_to_chord(song, scale, granularity=2):
     keys = list(song.sing())
-    time_max = max([x.start + x.length for x in keys])
+    time_max = int(max([x.start + x.length for x in keys]))
     melodies = defaultdict(list)
     for key in keys:
         time = floor(key.start / granularity) * granularity
@@ -35,11 +35,19 @@ def _song_to_chord(song, scale, granularity=2):
             weight = _get_melody_weight(melody)
             scores = [scale.score_melody(melody, n, weight=weight) for n in valid_numbers]
             next_number = max(zip(valid_numbers, scores), key=lambda x: x[1])[0]
-        chords.append(next_number)
+        current_number = next_number
+        chords.append(current_number)
 
-        
-        
-    
+    return chords
 
 
-def reharmonize(song, scale):
+from singable import MultiKey, Enumerate
+
+
+def reharmonize(song, scale, granularity=2):
+    chords = _song_to_chord(song, scale, granularity=granularity)
+    progression = []
+    for number in chords:
+        c = scale.diatonic(number)
+        progression.append(MultiKey(notes=c, length=granularity))
+    return Enumerate()(progression)

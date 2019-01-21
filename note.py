@@ -290,7 +290,7 @@ def chord(c, octave=4):
     return tuple([result[k] for k in sorted(result.keys())])
 
 
-def chord_to_notation(c):
+# def chord_to_notation(c):
     
 
 
@@ -399,7 +399,7 @@ class Scale:
     def available_tension_note(self, number):
         return self.available_tension_note_primary(number) + self.available_tension_note_secondary(number)
 
-    def score_melody(self, x, number, weight=None):
+    def score_melody(self, melody, number, weight=None):
         base = self.diatonic(number, include_seventh=True)
         primary = self.available_tension_note_primary(number)
         secondary = self.available_tension_note_secondary(number)
@@ -411,10 +411,11 @@ class Scale:
             return False
 
         if weight is None:
-            weight = [1] * len(x)
+            weight = [1] * len(melody)
         
         score = []
-        for note in x:
+        for key in melody:
+            note = key.note
             if check_tuple(base, note):
                 score.append(1)
             elif check_tuple(primary, note):

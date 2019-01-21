@@ -1,78 +1,48 @@
 from note import chord
 from singable import MultiKey, Key, Enumerate, Parallel, AtChannel, Transpose, Amplify
-from note import Note, Interval
+from note import Note, Interval, Scale
+from reharmonize import reharmonize
 
+
+song = Enumerate()([
+    Key(length=1, note=Note('G4')),
+    Key(length=1, note=Note('G4')),
+    Key(length=1/2, note=Note('E4')),
+    Key(length=1/2, note=Note('F4')),
+    Key(length=1, note=Note('G4')),
+    Key(length=1, note=Note('A4')),
+    Key(length=1, note=Note('A4')),
+    Key(length=2, note=Note('G4')),
+    Key(length=1, note=Note('G4')),
+    Key(length=1, note=Note('C5')),
+    Key(length=1, note=Note('E5')),
+    Key(length=1/2, note=Note('D5')),
+    Key(length=1/2, note=Note('C5')),
+    Key(length=3, note=Note('D5')),
+    Key(length=1, note=None),
+    Key(length=1, note=Note('E5')),
+    Key(length=1, note=Note('E5')),
+    Key(length=1, note=Note('D5')),
+    Key(length=1, note=Note('D5')),
+    Key(length=1, note=Note('C5')),
+    Key(length=1/2, note=Note('D5')),
+    Key(length=1/2, note=Note('C5')),
+    Key(length=1, note=Note('A4')),
+    Key(length=1, note=Note('A4')),
+    Key(length=1, note=Note('G4')),
+    Key(length=1, note=Note('G4')),
+    Key(length=1, note=Note('G4')),
+    Key(length=1/2, note=Note('E4')),
+    Key(length=1/2, note=Note('D4')),
+    Key(length=3, note=Note('C4')),
+    Key(length=1, note=None),
+])
+
+progression = reharmonize(song, Scale(tonic=Note('C5'), quality='major'))
 
 song = Parallel()([
-    AtChannel(0)(
-        Enumerate()([
-            Key(length=1, note=Note('G4')),
-            Key(length=1, note=Note('G4')),
-            Key(length=1/2, note=Note('E4')),
-            Key(length=1/2, note=Note('F4')),
-            Key(length=1, note=Note('G4')),
-            Key(length=1, note=Note('A4')),
-            Key(length=1, note=Note('A4')),
-            Key(length=2, note=Note('G4')),
-            Key(length=1, note=Note('G4')),
-            Key(length=1, note=Note('C5')),
-            Key(length=1, note=Note('E5')),
-            Key(length=1/2, note=Note('D5')),
-            Key(length=1/2, note=Note('C5')),
-            Key(length=3, note=Note('D5')),
-            Key(length=1, note=None),
-            Key(length=1, note=Note('E5')),
-            Key(length=1, note=Note('E5')),
-            Key(length=1, note=Note('D5')),
-            Key(length=1, note=Note('D5')),
-            Key(length=1, note=Note('C5')),
-            Key(length=1/2, note=Note('D5')),
-            Key(length=1/2, note=Note('C5')),
-            Key(length=1, note=Note('A4')),
-            Key(length=1, note=Note('A4')),
-            Key(length=1, note=Note('G4')),
-            Key(length=1, note=Note('G4')),
-            Key(length=1, note=Note('G4')),
-            Key(length=1/2, note=Note('E4')),
-            Key(length=1/2, note=Note('D4')),
-            Key(length=3, note=Note('C4')),
-            Key(length=1, note=None),
-        ])
-    ),
-    AtChannel(1)(
-        Amplify(0.75)(
-            Transpose(-Interval('P8'))(
-                Enumerate()([
-                    # MultiKey(length=4, notes=chord('C')),
-                    # MultiKey(length=2, notes=chord('F')),
-                    # MultiKey(length=2, notes=chord('C')),
-                    # MultiKey(length=4, notes=chord('C')),
-                    # MultiKey(length=4, notes=chord('G')),
-                    # MultiKey(length=2, notes=chord('C')),
-                    # MultiKey(length=2, notes=chord('G7')),
-                    # MultiKey(length=2, notes=chord('C')),
-                    # MultiKey(length=2, notes=chord('D7')),
-                    # MultiKey(length=3, notes=chord('C')),
-                    # MultiKey(length=1, notes=chord('G')),
-                    # MultiKey(length=4, notes=chord('C')),
-                    MultiKey(length=2, notes=chord('CM7')),
-                    MultiKey(length=2, notes=chord('Dm7')),
-                    MultiKey(length=2, notes=chord('G7')),
-                    MultiKey(length=2, notes=chord('CM7')),
-                    MultiKey(length=2, notes=chord('FM7')),
-                    MultiKey(length=2, notes=chord('D7')),
-                    MultiKey(length=4, notes=chord('G7')),
-                    MultiKey(length=2, notes=chord('Am7')),
-                    MultiKey(length=2, notes=chord('C7')),
-                    MultiKey(length=2, notes=chord('FM7')),
-                    MultiKey(length=2, notes=chord('A7')),
-                    MultiKey(length=2, notes=chord('Dm7')),
-                    MultiKey(length=2, notes=chord('G7')),
-                    MultiKey(length=4, notes=chord('C')),
-                ])
-            )
-        )
-    ),
+    AtChannel(0)(song),
+    AtChannel(1)(progression)
 ])
 
 from instruments.ensemble import string_ensemble_1
