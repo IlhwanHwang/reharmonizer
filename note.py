@@ -36,6 +36,12 @@ class Interval:
             # TODO: add out of range exception
             return Interval(number=self.number, quality=order_major[order_major.index(self.quality) - 1], inverted=self.inverted)
     
+    def fundamental(self):
+        number = self.number
+        while number > 7:
+            number -= 7
+        return Interval(number=number, quality=self.quality, inverted=self.inverted)
+
     def invert(self):
         return Interval(number=self.number, quality=self.quality, inverted=~self.inverted)
 
@@ -282,7 +288,12 @@ def chord(c, octave=4):
         result[4] = result[1] + Interval('P4')
     
     return tuple([result[k] for k in sorted(result.keys())])
+
+
+def chord_to_notation(c):
     
+
+
 
 class Scale:
 
@@ -387,6 +398,33 @@ class Scale:
 
     def available_tension_note(self, number):
         return self.available_tension_note_primary(number) + self.available_tension_note_secondary(number)
+
+    def score_melody(self, x, number, weight=None):
+        base = self.diatonic(number, include_seventh=True)
+        primary = self.available_tension_note_primary(number)
+        secondary = self.available_tension_note_secondary(number)
+        
+        def check_tuple(tup, x):
+            for y in tup:
+                if x.replace(octave=0) == y.replace(octave=0):
+                    return True
+            return False
+
+        if weight is None:
+            weight = [1] * len(x)
+        
+        score = []
+        for note in x:
+            if check_tuple(base, note):
+                score.append(1)
+            elif check_tuple(primary, note):
+                score.append(0.5)
+            elif check_tuple(secondary, note):
+                score.append(0.25)
+            else:
+                score.append(0)
+        
+        return sum([s * w for s, w in zip(score, weight)]) / sum(weight)
 
 
 if __name__ == '__main__':
