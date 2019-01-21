@@ -4,9 +4,9 @@ class Interval:
     def __init__(self, notation=None, number=None, quality=None, inverted=False):
         if notation:
             # TODO: add notation syntax check
-            _, inverted, quality, number = re.match(r'(-)?(M|m|A|AA|d|dd|P)(\d+)', notation).groups()
+            inverted, quality, number = re.match(r'(-)?(M|m|A|AA|d|dd|P)(\d+)', notation).groups()
             number = int(number)
-            quality = re.sub('[0-9]', '', notation)
+            inverted = True if inverted else False
         
         self.number = number
         self.quality = quality
@@ -44,6 +44,9 @@ class Interval:
     
     def __eq__(self, other):
         return self.get_semitones() == other.get_semitones()
+
+    def __neg__(self):
+        return self.invert()
 
     def get_semitones(self):
         number = self.number
@@ -136,6 +139,9 @@ class Note:
 
             return Interval(number=number, quality=Interval.get_quality(number, halves))
 
+        elif isinstance(other, Interval):
+            return self + (-other)
+
         else:
             raise ValueError('Subtraction is supported only between notes')
 
@@ -177,7 +183,7 @@ class Note:
         return self.midi_number() == other.midi_number()
 
     def __str__(self):
-        return self.tone + Note._semitone_notation(self.semitones) + (str(self.octave) if self.octave else '')
+        return self.tone + Note._semitone_notation(self.semitones) + str(self.octave)
 
     def __lt__(self, other):
         return self.midi_number() < other.midi_number()
@@ -210,7 +216,7 @@ class Note:
         return { 3: '#x', 2: 'x', 1: '#', 0: '', -1: 'b', -2: 'bb', -3: 'bbb' }[semitones]
 
 
-def chord(c, octave=5):
+def chord(c, octave=4):
     symbol_map = {
         'm': 'minor',
         'min': 'minor',
