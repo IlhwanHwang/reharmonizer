@@ -44,20 +44,14 @@
 		{
 			\time
 			4/4
-			<c e g b>2
-			<d f a c'>2
-			<g b d' f'>2
-			<c e g b>2
-			<f a c' e'>2
-			<d fes a c'>2
-			<g b d' f'>1
-			<a c' e' g'>2
-			<c e g bis>2
-			<f a c' e'>2
-			<a ces' e' g'>2
-			<d f a c'>2
-			<g b d' f'>2
-			<c e g>1
+			<c' e' g'>1
+			<a' c'' e''>1
+			<a' c'' e''>1
+			<d' f' a'>1
+			<e' g' b'>1
+			<d' f' a'>1
+			<e' g' b'>1
+			<d' f' a'>1
 		}
 	>>
 }

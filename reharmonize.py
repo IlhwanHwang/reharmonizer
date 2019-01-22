@@ -15,28 +15,40 @@ def _song_to_chord(song, scale, granularity=2):
         time = floor(key.start / granularity) * granularity
         melodies[time].append(key)
 
-    numbers = [1, 4, 5]
-    transitions = {
-        1: [1, 4, 5],
-        4: [1, 4, 5],
-        5: [1, 4, 5],
-        None: [1]
-    }
-
-    current_number = None
-    chords = []
+    numbers = [1, 2, 3, 4, 5, 6]
+    scores = []
 
     for time in range(0, time_max, granularity):
         melody = melodies[time]
-        if not melody:
-            next_number = current_number
-        else:
-            valid_numbers = transitions[current_number]
-            weight = _get_melody_weight(melody)
-            scores = [scale.score_melody(melody, n, weight=weight) for n in valid_numbers]
-            next_number = max(zip(valid_numbers, scores), key=lambda x: x[1])[0]
-        current_number = next_number
-        chords.append(current_number)
+        weight = _get_melody_weight(melody)
+        scores.append({ number: scale.score_melody(melody, number, weight=weight) for number in numbers })
+    
+    transitions = {
+        1: [1, 3, 6, 2, 4, 5],
+        2: [2, 3, 5],
+        3: [3, 6, 2, 4],
+        4: [4, 1, 3, 2, 5],
+        5: [5, 1, 3, 6],
+        6: [6, 3, 2, 4]
+    }
+    inv_transitions = { number: [] for number in transitions.keys() }
+    for src, dests in transitions.items():
+        for dest in dests:
+            inv_transitions[dest].append(src)
+    
+    dag = [{ 1: (0, None) }]
+    for score in scores[1:]:
+        prev = dag[-1]
+        current = {}
+        for number in inv_transitions.keys():
+            target, (value, _) = max(filter(lambda x: x[0] in inv_transitions[number], prev.items()), key=lambda x: x[1][0])
+            current[number] = (value + score[number], target)
+        dag.append(current)
+    
+    chords = [max(dag[-1].items(), key=lambda x: x[1][0])[0]]
+    for current in reversed(dag[1:]):
+        prev = chords[0]
+        chords.insert(0, current[prev][1])
 
     return chords
 
