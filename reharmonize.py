@@ -17,8 +17,8 @@ class ChordNode:
         self.prevs = []
         self.target = None
     
-    def actual_value(self):
-        return (self.length ** 1.1) * self.value
+    def actual_value(self, length_advantage=1.1):
+        return (self.length ** length_advantage) * self.value
 
 
 class ChordDag:
@@ -64,7 +64,7 @@ class ChordDag:
                 n.total_value = m.total_value + n.actual_value()
                 n.target = m
             else:
-                n.total_value = 0
+                n.total_value = n.actual_value()
         
         timing_max = max([n.start + n.length for n in self.nodes])
         endnodes = [n for n in self.nodes if n.start + n.length == timing_max]
@@ -76,6 +76,44 @@ class ChordDag:
             node = node.target
         
         return result
+
+
+def _score_melody(scale, melody, number, weight=None, score_consonance=1, score_fifth=0.5, score_primary=0.25, score_secondary=0.125, score_dissonance=-1):
+    is_rest = [key.note is None for key in melody]
+    melody = list(map(lambda x: x[1], filter(lambda x: not x[0], zip(is_rest, melody))))
+    weight = list(map(lambda x: x[1], filter(lambda x: not x[0], zip(is_rest, weight))))
+
+    if not melody:
+        return 0
+
+    base = scale.diatonic(number, include_seventh=True)
+    primary = scale.available_tension_note_primary(number)
+    secondary = scale.available_tension_note_secondary(number)
+    
+    def check_tuple(tup, x):
+        for y in tup:
+            if x.replace(octave=0) == y.replace(octave=0):
+                return True
+        return False
+
+    if weight is None:
+        weight = [1] * len(melody)
+    
+    score = []
+    for key in melody:
+        note = key.note
+        if check_tuple(base[:2], note):
+            score.append(score_consonance)
+        elif check_tuple(base[2:], note):
+            score.append(score_fifth)
+        elif check_tuple(primary, note):
+            score.append(score_primary)
+        elif check_tuple(secondary, note):
+            score.append(score_secondary)
+        else:
+            score.append(score_dissonance)
+    
+    return sum([s * w for s, w in zip(score, weight)]) / sum(weight)
 
 
 def _song_to_chord(song, scale, granularity=(1, 2, 4), 
@@ -110,7 +148,7 @@ def _song_to_chord(song, scale, granularity=(1, 2, 4),
             weight = _get_melody_weight(part)
             scores = []
             for number in numbers:
-                score = scale.score_melody(part, number, weight)
+                score = _score_melody(scale, part, number, weight)
                 if (timing + g - offset) % cadence_at == 0:
                     if number not in scale.possible_cadences():
                         score -= cadence_score

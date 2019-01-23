@@ -405,43 +405,6 @@ class Scale:
     def possible_cadences(self):
         return [1, 5]
 
-    def score_melody(self, melody, number, weight=None, score_consonance=1, score_fifth=0.75, score_primary=0.5, score_secondary=0.25, score_dissonance=-1):
-        is_rest = [key.note is None for key in melody]
-        melody = list(map(lambda x: x[1], filter(lambda x: not x[0], zip(is_rest, melody))))
-        weight = list(map(lambda x: x[1], filter(lambda x: not x[0], zip(is_rest, weight))))
-
-        if not melody:
-            return 0
-
-        base = self.diatonic(number, include_seventh=True)
-        primary = self.available_tension_note_primary(number)
-        secondary = self.available_tension_note_secondary(number)
-        
-        def check_tuple(tup, x):
-            for y in tup:
-                if x.replace(octave=0) == y.replace(octave=0):
-                    return True
-            return False
-
-        if weight is None:
-            weight = [1] * len(melody)
-        
-        score = []
-        for key in melody:
-            note = key.note
-            if check_tuple(base[:2], note):
-                score.append(score_consonance)
-            elif check_tuple(base[2:], note):
-                score.append(score_fifth)
-            elif check_tuple(primary, note):
-                score.append(score_primary)
-            elif check_tuple(secondary, note):
-                score.append(score_secondary)
-            else:
-                score.append(score_dissonance)
-        
-        return sum([s * w for s, w in zip(score, weight)]) / sum(weight)
-
 
 if __name__ == '__main__':
     import unittest
