@@ -265,7 +265,7 @@ class _AtNote(Singable):
 
 class _Arpeggio(Singable):
     # outliers can be 'loop', 'octave', 'clip'
-    def __init__(self, chord_and_pattern, outliers='loop', number_offset=64):
+    def __init__(self, chord_and_pattern, outliers='loop', number_offset=60):
         self.chord, self.pattern = chord_and_pattern
         self.outliers = outliers
         self.number_offset = number_offset
@@ -313,7 +313,7 @@ Harmonize = parameter_graphmaker(_Harmonize)
 Swing = parameter_graphmaker(_Swing)
 AtChannel = parameter_graphmaker(_AtChannel)
 AtNote = parameter_graphmaker(_AtNote)
-# Arpeggio = parameter_graphmaker(_Arpeggio)
+Arpeggio = parameter_graphmaker(_Arpeggio)
 
 
 def to_midi(

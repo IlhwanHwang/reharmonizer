@@ -1,5 +1,5 @@
 from note import chord
-from singable import MultiKey, Key, Enumerate, Parallel, AtChannel, Transpose, Amplify
+from singable import MultiKey, Key, Enumerate, Parallel, AtChannel, Transpose, Amplify, Arpeggio, Repeat
 from note import Note, Interval, Scale
 from reharmonize import reharmonize
 
@@ -38,56 +38,119 @@ song = Enumerate()([
     Key(length=1, note=None),
 ])
 
-song = Enumerate()([
-    Key(length=1, note=Note('C4')),
-    Key(length=1, note=Note('C4')),
-    Key(length=1, note=Note('G4')),
-    Key(length=1, note=Note('G4')),
-    Key(length=1, note=Note('A4')),
-    Key(length=1, note=Note('A4')),
-    Key(length=2, note=Note('G4')),
-    Key(length=1, note=Note('F4')),
-    Key(length=1, note=Note('F4')),
-    Key(length=1, note=Note('E4')),
-    Key(length=1, note=Note('E4')),
-    Key(length=1, note=Note('D4')),
-    Key(length=1, note=Note('D4')),
-    Key(length=2, note=Note('C4')),
-    Key(length=1, note=Note('G4')),
-    Key(length=1, note=Note('G4')),
-    Key(length=1, note=Note('F4')),
-    Key(length=1, note=Note('F4')),
-    Key(length=1, note=Note('E4')),
-    Key(length=1, note=Note('E4')),
-    Key(length=2, note=Note('D4')),
-    Key(length=1, note=Note('G4')),
-    Key(length=1, note=Note('G4')),
-    Key(length=1, note=Note('F4')),
-    Key(length=1, note=Note('F4')),
-    Key(length=1, note=Note('E4')),
-    Key(length=1, note=Note('E4')),
-    Key(length=2, note=Note('D4')),
-    Key(length=1, note=Note('C4')),
-    Key(length=1, note=Note('C4')),
-    Key(length=1, note=Note('G4')),
-    Key(length=1, note=Note('G4')),
-    Key(length=1, note=Note('A4')),
-    Key(length=1, note=Note('A4')),
-    Key(length=2, note=Note('G4')),
-    Key(length=1, note=Note('F4')),
-    Key(length=1, note=Note('F4')),
-    Key(length=1, note=Note('E4')),
-    Key(length=1, note=Note('E4')),
-    Key(length=1, note=Note('D4')),
-    Key(length=1, note=Note('D4')),
-    Key(length=2, note=Note('C4')),
-])
+# song = Enumerate()([
+#     Key(length=1, note=Note('C4')),
+#     Key(length=1, note=Note('C4')),
+#     Key(length=1, note=Note('G4')),
+#     Key(length=1, note=Note('G4')),
+#     Key(length=1, note=Note('A4')),
+#     Key(length=1, note=Note('A4')),
+#     Key(length=2, note=Note('G4')),
+#     Key(length=1, note=Note('F4')),
+#     Key(length=1, note=Note('F4')),
+#     Key(length=1, note=Note('E4')),
+#     Key(length=1, note=Note('E4')),
+#     Key(length=1, note=Note('D4')),
+#     Key(length=1, note=Note('D4')),
+#     Key(length=2, note=Note('C4')),
+#     Key(length=1, note=Note('G4')),
+#     Key(length=1, note=Note('G4')),
+#     Key(length=1, note=Note('F4')),
+#     Key(length=1, note=Note('F4')),
+#     Key(length=1, note=Note('E4')),
+#     Key(length=1, note=Note('E4')),
+#     Key(length=2, note=Note('D4')),
+#     Key(length=1, note=Note('G4')),
+#     Key(length=1, note=Note('G4')),
+#     Key(length=1, note=Note('F4')),
+#     Key(length=1, note=Note('F4')),
+#     Key(length=1, note=Note('E4')),
+#     Key(length=1, note=Note('E4')),
+#     Key(length=2, note=Note('D4')),
+#     Key(length=1, note=Note('C4')),
+#     Key(length=1, note=Note('C4')),
+#     Key(length=1, note=Note('G4')),
+#     Key(length=1, note=Note('G4')),
+#     Key(length=1, note=Note('A4')),
+#     Key(length=1, note=Note('A4')),
+#     Key(length=2, note=Note('G4')),
+#     Key(length=1, note=Note('F4')),
+#     Key(length=1, note=Note('F4')),
+#     Key(length=1, note=Note('E4')),
+#     Key(length=1, note=Note('E4')),
+#     Key(length=1, note=Note('D4')),
+#     Key(length=1, note=Note('D4')),
+#     Key(length=2, note=Note('C4')),
+# ])
+
+
+# song = Enumerate()([
+#     Key(length=1, note=Note('E4')),
+#     Key(length=1/2, note=Note('C4')),
+#     Key(length=1/2, note=Note('D4')),
+#     Key(length=1, note=Note('E4')),
+#     Key(length=1, note=Note('G4')),
+#     Key(length=1, note=Note('D4')),
+#     Key(length=1, note=Note('D4')),
+#     Key(length=2, note=Note('D4')),
+#     Key(length=1, note=Note('E4')),
+#     Key(length=1/2, note=Note('C4')),
+#     Key(length=1/2, note=Note('D4')),
+#     Key(length=1, note=Note('E4')),
+#     Key(length=1, note=Note('G4')),
+#     Key(length=1, note=Note('A4')),
+#     Key(length=1, note=Note('A4')),
+#     Key(length=2, note=Note('A4')),
+#     Key(length=2, note=Note('C5')),
+#     Key(length=2, note=Note('B4')),
+#     Key(length=2, note=Note('A4')),
+#     Key(length=2, note=Note('G4')),
+#     Key(length=2, note=Note('C5')),
+#     Key(length=2, note=Note('B4')),
+#     Key(length=2, note=Note('A4')),
+#     Key(length=2, note=Note('G4')),
+#     Key(length=1, note=Note('E4')),
+#     Key(length=1/2, note=Note('C4')),
+#     Key(length=1/2, note=Note('D4')),
+#     Key(length=1, note=Note('E4')),
+#     Key(length=1, note=Note('G4')),
+#     Key(length=1, note=Note('D4')),
+#     Key(length=1, note=Note('D4')),
+#     Key(length=2, note=Note('D4')),
+#     Key(length=1, note=Note('E4')),
+#     Key(length=1/2, note=Note('C4')),
+#     Key(length=1/2, note=Note('D4')),
+#     Key(length=1, note=Note('E4')),
+#     Key(length=1, note=Note('G4')),
+#     Key(length=1, note=Note('A4')),
+#     Key(length=1, note=Note('B4')),
+#     Key(length=2, note=Note('C5')),
+# ])
+
 
 progression = reharmonize(song, Scale(tonic=Note('C5'), quality='major'))
 
 song = Parallel()([
     AtChannel(0)(song),
-    AtChannel(1)(Transpose(Interval('-P8'))(progression))
+    AtChannel(1)(
+        Arpeggio()(
+            (
+                Transpose(Interval('-P15'))(progression),
+                Repeat(8)(
+                    Enumerate()([
+                        Key(length=1/2, note=Note('C4')),
+                        Key(length=1/2, note=Note('C##4')),
+                        Key(length=1/2, note=Note('C#4')),
+                        Key(length=1/2, note=Note('C##4')),
+                        Key(length=1/2, note=Note('C4')),
+                        Key(length=1/2, note=Note('C##4')),
+                        Key(length=1/2, note=Note('C#4')),
+                        Key(length=1/2, note=Note('C##4')),
+                    ])
+                )
+            )
+        )
+    )
 ])
 
 from instruments.ensemble import string_ensemble_1
@@ -108,7 +171,7 @@ from singable import to_midi
 
 mid = to_midi(song, instruments={ 
     0: acoustic_grand_piano,
-    1: string_ensemble_1,
+    1: acoustic_grand_piano,
     2: synth_bass_1,
     9: standard_drum_kit
 })

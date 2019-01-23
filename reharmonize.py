@@ -7,6 +7,7 @@ def _get_melody_weight(melody):
 from collections import defaultdict
 from math import floor
 
+
 class ChordNode:
     def __init__(self, number, value, start, length):
         self.value = value
@@ -112,12 +113,12 @@ def _score_melody(scale, melody, number, weight=None, score_consonance=1, score_
             score.append(score_secondary)
         else:
             score.append(score_dissonance)
-    
+
     return sum([s * w for s, w in zip(score, weight)]) / sum(weight)
 
 
 def _song_to_chord(song, scale, granularity=(1, 2, 4), 
-                   offset=0, cadence_at=16, cadence_score=1):
+                   offset=0, cadence_at=16, cadence_score=1, ):
 
     melody = list(song.sing())
 
