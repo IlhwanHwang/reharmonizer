@@ -139,6 +139,15 @@ def _song_to_chord(song, scale, granularity=(1, 2, 4),
     dag = ChordDag()
     numbers = scale.possible_numbers()
 
+    number_advantage = {
+        1: 0.2,
+        2: -0.2,
+        3: -0.2,
+        4: 0.2,
+        5: 0.2,
+        6: -0.2,
+    }
+
     for g in granularity:
         timing = offset
         while timing < time_max:
@@ -150,6 +159,7 @@ def _song_to_chord(song, scale, granularity=(1, 2, 4),
             scores = []
             for number in numbers:
                 score = _score_melody(scale, part, number, weight)
+                score += number_advantage[number]
                 if (timing + g - offset) % cadence_at == 0:
                     if number not in scale.possible_cadences():
                         score -= cadence_score
