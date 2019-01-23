@@ -399,7 +399,13 @@ class Scale:
     def available_tension_note(self, number):
         return self.available_tension_note_primary(number) + self.available_tension_note_secondary(number)
 
-    def score_melody(self, melody, number, weight=None, score_consonance=1, score_primary=0.5, score_secondary=0.25, score_dissonance=-1):
+    def possible_numbers(self):
+        return [1, 2, 3, 4, 5, 6]
+    
+    def possible_cadences(self):
+        return [1, 5]
+
+    def score_melody(self, melody, number, weight=None, score_consonance=1, score_fifth=0.75, score_primary=0.5, score_secondary=0.25, score_dissonance=-1):
         is_rest = [key.note is None for key in melody]
         melody = list(map(lambda x: x[1], filter(lambda x: not x[0], zip(is_rest, melody))))
         weight = list(map(lambda x: x[1], filter(lambda x: not x[0], zip(is_rest, weight))))
@@ -423,8 +429,10 @@ class Scale:
         score = []
         for key in melody:
             note = key.note
-            if check_tuple(base, note):
+            if check_tuple(base[:2], note):
                 score.append(score_consonance)
+            elif check_tuple(base[2:], note):
+                score.append(score_fifth)
             elif check_tuple(primary, note):
                 score.append(score_primary)
             elif check_tuple(secondary, note):

@@ -38,7 +38,7 @@ song = Enumerate()([
     Key(length=1, note=None),
 ])
 
-progression = reharmonize(song, Scale(tonic=Note('C5'), quality='major'), granularity=4)
+progression = reharmonize(song, Scale(tonic=Note('C5'), quality='major'))
 
 song = Parallel()([
     AtChannel(0)(song),
@@ -67,15 +67,15 @@ mid = to_midi(song, instruments={
     2: synth_bass_1,
     9: standard_drum_kit
 })
-# mid.save('new_song.mid')
+mid.save('new_song.mid')
 
-# import os
-# import subprocess
-# FNULL = open(os.devnull, 'w')
-# subprocess.call(['timidity', 'new_song.mid'], stdout=FNULL, stderr=subprocess.STDOUT)
+import os
+import subprocess
+FNULL = open(os.devnull, 'w')
+subprocess.call(['timidity', 'new_song.mid'], stdout=FNULL, stderr=subprocess.STDOUT)
 
-import mido
+# import mido
 
-port = mido.open_output()
-for msg in mid.play():
-    port.send(msg)
+# port = mido.open_output()
+# for msg in mid.play():
+#     port.send(msg)
