@@ -297,15 +297,14 @@ def chord(c, octave=4):
 
 class Scale:
 
-    def __init__(self, tonic=None, quality=None):
+    def __init__(self, tonic=None):
         # TODO: check quality syntax
         self.tonic = tonic
-        self.quality = quality
 
     def number_to_int(self, number):
         return ['i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii'].index(number.lower()) + 1
 
-    def note(self, number, override_quality=None):
+    def note(self, number):
         if isinstance(number, str):
             index = self.number_to_int(number)
         elif isinstance(number, int):
@@ -317,30 +316,13 @@ class Scale:
             index -= 7
             note += Interval('P8')
 
-        if (override_quality if override_quality else self.quality) == 'major':
-            interval_map = {
-                1: Interval('P1'),
-                2: Interval('M2'),
-                3: Interval('M3'),
-                4: Interval('P4'),
-                5: Interval('P5'),
-                6: Interval('M6'),
-                7: Interval('M7'),
-            }
-        elif (override_quality if override_quality else self.quality) == 'minor':
-            interval_map = {
-                1: Interval('P1'),
-                2: Interval('M2'),
-                3: Interval('m3'),
-                4: Interval('P4'),
-                5: Interval('P5'),
-                6: Interval('m6'),
-                7: Interval('m7'),
-            }
-        note += interval_map[index]
+        note += self.note_interval(index)
 
         return note
-    
+
+    def note_interval(self, index):
+        return None
+
     def diatonic(self, number, include_seventh=False):
         index = self.number_to_int(number)
         if include_seventh:
@@ -364,64 +346,66 @@ class Scale:
             _, base_num = re.match(r'v7/(i|ii|iii|iv|v|vi|vii)', number).groups()
             return self.secondary_dominant(base_num)
         else:
-            raise ValueError(f'No matching chord like "{number}"')
+            raise ValueError('No matching chord like "{}"'.format(number))
 
     def available_tension_note_primary(self, number):
-        number = number.lower()
-        if self.quality == 'major':
-            intervals_map = {
-                'i': [Interval('M9'), Interval('M13')],
-                'ii': [Interval('M9'), Interval('P11')],
-                'iii': [Interval('P11')],
-                'iv': [Interval('M9'), Interval('A11'), Interval('M13')],
-                'v': [Interval('M9'), Interval('M13')],
-                'vi': [Interval('M9'), Interval('P11')],
-                'vii': [Interval('P11'), Interval('m13')],
-            }
-            
-        elif self.quality == 'minor':
-            intervals_map = {
-                'i': [Interval('M9'), Interval('M13')],
-                'ii': [Interval('P11'), Interval('m13')],
-                'iii': [Interval('M9'), Interval('M13')],
-                'iv': [Interval('M9'), Interval('P11'), Interval('M13')],
-                'v': [Interval('m9'), Interval('A9'), Interval('m13')],
-                'vi': [Interval('M9'), Interval('A9'), Interval('M13')],
-                'vii': [Interval('M9'), Interval('M13')],
-            }
-
-        base = self.note(number)
-        return [base + intv for intv in intervals_map[number]]
+        return None
     
     def available_tension_note_secondary(self, number):
-        if self.quality == 'major':
-            intervals_map = {
-                'i': [Interval('A11')],
-                'ii': [],
-                'iii': [Interval('M9')],
-                'iv': [],
-                'v': [Interval('m9'), Interval('A9'), Interval('A11'), Interval('m13')],
-                'vi': [Interval('M13')],
-                'vii': [],
-            }
-            
-        elif self.quality == 'minor':
-            intervals_map = {
-                'i': [Interval('M13')],
-                'ii': [],
-                'iii': [Interval('A11')],
-                'iv': [],
-                'v': [Interval('M9'), Interval('A11')],
-                'vi': [],
-                'vii': [],
-            }
-
-        base = self.note(number)
-        return [base + intv for intv in intervals_map[number]]
+        return None
 
     def available_tension_note(self, number):
         return self.available_tension_note_primary(number) + self.available_tension_note_secondary(number)
 
+    def possible_numbers(self):
+        return None
+    
+    def possible_cadences(self):
+        return None
+
+
+
+class MajorScale(Scale):
+
+    def note_interval(self, index):
+        return {
+            1: Interval('P1'),
+            2: Interval('M2'),
+            3: Interval('M3'),
+            4: Interval('P4'),
+            5: Interval('P5'),
+            6: Interval('M6'),
+            7: Interval('M7'),
+        }[index]
+
+    def available_tension_note_primary(self, number):
+        number = number.lower()
+        intervals_map = {
+            'i': [Interval('M9'), Interval('M13')],
+            'ii': [Interval('M9'), Interval('P11')],
+            'iii': [Interval('P11')],
+            'iv': [Interval('M9'), Interval('A11'), Interval('M13')],
+            'v': [Interval('M9'), Interval('M13')],
+            'vi': [Interval('M9'), Interval('P11')],
+            'vii': [Interval('P11'), Interval('m13')],
+        }
+        base = self.note(number)
+        return [base + intv for intv in intervals_map[number]]
+    
+    def available_tension_note_secondary(self, number):
+        number = number.lower()
+        intervals_map = {
+            'i': [Interval('A11')],
+            'ii': [],
+            'iii': [Interval('M9')],
+            'iv': [],
+            'v': [Interval('m9'), Interval('A9'), Interval('A11'), Interval('m13')],
+            'vi': [Interval('M13')],
+            'vii': [],
+        }
+        base = self.note(number)
+        return [base + intv for intv in intervals_map[number]]
+    
     def possible_numbers(self):
         return ['i', 'ii', 'iii', 'iv', 'v', 'vi']
     
@@ -429,6 +413,60 @@ class Scale:
         return ['i', 'v']
 
 
+class NaturalMinorScale(Scale):
+
+    def note_interval(self, index):
+        return {
+            1: Interval('P1'),
+            2: Interval('M2'),
+            3: Interval('m3'),
+            4: Interval('P4'),
+            5: Interval('P5'),
+            6: Interval('m6'),
+            7: Interval('m7'),
+        }[index]
+
+    def diatonic(self, number, include_seventh=False):
+        if number == 'v':
+            pass
+        else:
+            return super(NaturalMinorScale, self).diatonic(number, include_seventh=include_seventh)
+
+    def available_tension_note_primary(self, number):
+        number = number.lower()
+        intervals_map = {
+            'i': [Interval('M9'), Interval('M13')],
+            'ii': [Interval('P11'), Interval('m13')],
+            'iii': [Interval('M9'), Interval('M13')],
+            'iv': [Interval('M9'), Interval('P11'), Interval('M13')],
+            'v': [Interval('m9'), Interval('A9'), Interval('m13')],
+            'vi': [Interval('M9'), Interval('A9'), Interval('M13')],
+            'vii': [Interval('M9'), Interval('M13')],
+        }
+        base = self.note(number)
+        return [base + intv for intv in intervals_map[number]]
+    
+    def available_tension_note_secondary(self, number):
+        number = number.lower()
+        intervals_map = {
+            'i': [Interval('M13')],
+            'ii': [],
+            'iii': [Interval('A11')],
+            'iv': [],
+            'v': [Interval('M9'), Interval('A11')],
+            'vi': [],
+            'vii': [],
+        }
+        base = self.note(number)
+        return [base + intv for intv in intervals_map[number]]
+    
+    def possible_numbers(self):
+        return ['i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii']
+    
+    def possible_cadences(self):
+        return ['i', 'v']
+
+    
 if __name__ == '__main__':
     import unittest
 

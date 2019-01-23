@@ -1,6 +1,6 @@
 from note import chord
 from singable import MultiKey, Key, Enumerate, Parallel, AtChannel, Transpose, Amplify, Arpeggio, Repeat
-from note import Note, Interval, Scale
+from note import Note, Interval, MajorScale
 from reharmonize import reharmonize
 
 
@@ -128,7 +128,7 @@ song = Enumerate()([
 # ])
 
 
-progression = reharmonize(song, Scale(tonic=Note('C5'), quality='major'))
+progression = reharmonize(song, MajorScale(tonic=Note('C5')))
 
 song = Parallel()([
     AtChannel(0)(song),
@@ -177,13 +177,12 @@ mid = to_midi(song, instruments={
 })
 mid.save('new_song.mid')
 
-import os
-import subprocess
-FNULL = open(os.devnull, 'w')
-subprocess.call(['timidity', 'new_song.mid'], stdout=FNULL, stderr=subprocess.STDOUT)
+# import os
+# import subprocess
+# FNULL = open(os.devnull, 'w')
+# subprocess.call(['timidity', 'new_song.mid'], stdout=FNULL, stderr=subprocess.STDOUT)
 
-# import mido
-
-# port = mido.open_output()
-# for msg in mid.play():
-#     port.send(msg)
+import mido
+port = mido.open_output()
+for msg in mid.play():
+    port.send(msg)
