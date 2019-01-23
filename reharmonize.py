@@ -34,12 +34,12 @@ class ChordDag:
             n.prev = []
 
         transitions = {
-            1: [1, 3, 6, 2, 4, 5],
-            2: [2, 3, 5],
-            3: [3, 6, 2, 4],
-            4: [4, 1, 3, 2, 5],
-            5: [5, 1, 3, 6],
-            6: [6, 3, 2, 4]
+            'i': ['i', 'iii', 'vi', 'ii', 'iv', 'v'],
+            'ii': ['ii', 'iii', 'v'],
+            'iii': ['iii', 'vi', 'ii', 'iv'],
+            'iv': ['iv', 'i', 'iii', 'ii', 'v'],
+            'v': ['v', 'i', 'iii', 'vi'],
+            'vi': ['vi', 'iii', 'ii', 'iv']
         }
         inv_transitions = { number: [] for number in transitions.keys() }
         for src, dests in transitions.items():
@@ -140,12 +140,12 @@ def _song_to_chord(song, scale, granularity=(1, 2, 4),
     numbers = scale.possible_numbers()
 
     number_advantage = {
-        1: 0.2,
-        2: -0.2,
-        3: -0.2,
-        4: 0.2,
-        5: 0.2,
-        6: -0.2,
+        'i': 0.2,
+        'ii': -0.2,
+        'iii': -0.2,
+        'iv': 0.2,
+        'v': 0.2,
+        'vi': -0.2,
     }
 
     for g in granularity:

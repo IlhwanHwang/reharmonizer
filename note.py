@@ -302,10 +302,19 @@ class Scale:
         self.tonic = tonic
         self.quality = quality
 
+    def number_to_int(self, number):
+        return ['i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii'].index(number.lower()) + 1
+
     def note(self, number, override_quality=None):
+        if isinstance(number, str):
+            index = self.number_to_int(number)
+        elif isinstance(number, int):
+            index = number
+        else:
+            raise ValueError('Int or string are supported')
         note = self.tonic
-        while number > 7:
-            number -= 7
+        while index > 7:
+            index -= 7
             note += Interval('P8')
 
         if (override_quality if override_quality else self.quality) == 'major':
@@ -328,43 +337,57 @@ class Scale:
                 6: Interval('m6'),
                 7: Interval('m7'),
             }
-        note += interval_map[number]
+        note += interval_map[index]
 
         return note
     
     def diatonic(self, number, include_seventh=False):
+        index = self.number_to_int(number)
         if include_seventh:
-            return (self.note(number), self.note(number + 2), self.note(number + 4), self.note(number + 6))
+            return (self.note(index), self.note(index + 2), self.note(index + 4), self.note(index + 6))
         else:
-            return (self.note(number), self.note(number + 2), self.note(number + 4))
+            return (self.note(index), self.note(index + 2), self.note(index + 4))
     
     def secondary_dominant(self, number, extend=0):
-        base = self.note(number) + Interval('P5')
+        index = self.number_to_int(number)
+        base = self.note(index) + Interval('P5')
         for _ in range(extend):
             base += Interval('P5')
         return chord(str(base.replace(octave='')) + '7')
 
+    def chord(self, number):
+        number = number.lower()
+        if re.match(r'(i|ii|iii|iv|v|vi|vii)(7)?', number):
+            _, base_num, seventh = re.match(r'(i|ii|iii|iv|v|vi|vii)(7)?', number).groups()
+            return self.diatonic(base_num, include_seventh=(True if seventh else False))
+        elif re.match(r'v7/(i|ii|iii|iv|v|vi|vii)', number):
+            _, base_num = re.match(r'v7/(i|ii|iii|iv|v|vi|vii)', number).groups()
+            return self.secondary_dominant(base_num)
+        else:
+            raise ValueError(f'No matching chord like "{number}"')
+
     def available_tension_note_primary(self, number):
+        number = number.lower()
         if self.quality == 'major':
             intervals_map = {
-                1: [Interval('M9'), Interval('M13')],
-                2: [Interval('M9'), Interval('P11')],
-                3: [Interval('P11')],
-                4: [Interval('M9'), Interval('A11'), Interval('M13')],
-                5: [Interval('M9'), Interval('M13')],
-                6: [Interval('M9'), Interval('P11')],
-                7: [Interval('P11'), Interval('m13')],
+                'i': [Interval('M9'), Interval('M13')],
+                'ii': [Interval('M9'), Interval('P11')],
+                'iii': [Interval('P11')],
+                'iv': [Interval('M9'), Interval('A11'), Interval('M13')],
+                'v': [Interval('M9'), Interval('M13')],
+                'vi': [Interval('M9'), Interval('P11')],
+                'vii': [Interval('P11'), Interval('m13')],
             }
             
         elif self.quality == 'minor':
             intervals_map = {
-                1: [Interval('M9'), Interval('M13')],
-                2: [Interval('P11'), Interval('m13')],
-                3: [Interval('M9'), Interval('M13')],
-                4: [Interval('M9'), Interval('P11'), Interval('M13')],
-                5: [Interval('m9'), Interval('A9'), Interval('m13')],
-                6: [Interval('M9'), Interval('A9'), Interval('M13')],
-                7: [Interval('M9'), Interval('M13')],
+                'i': [Interval('M9'), Interval('M13')],
+                'ii': [Interval('P11'), Interval('m13')],
+                'iii': [Interval('M9'), Interval('M13')],
+                'iv': [Interval('M9'), Interval('P11'), Interval('M13')],
+                'v': [Interval('m9'), Interval('A9'), Interval('m13')],
+                'vi': [Interval('M9'), Interval('A9'), Interval('M13')],
+                'vii': [Interval('M9'), Interval('M13')],
             }
 
         base = self.note(number)
@@ -373,24 +396,24 @@ class Scale:
     def available_tension_note_secondary(self, number):
         if self.quality == 'major':
             intervals_map = {
-                1: [Interval('A11')],
-                2: [],
-                3: [Interval('M9')],
-                4: [],
-                5: [Interval('m9'), Interval('A9'), Interval('A11'), Interval('m13')],
-                6: [Interval('M13')],
-                7: [],
+                'i': [Interval('A11')],
+                'ii': [],
+                'iii': [Interval('M9')],
+                'iv': [],
+                'v': [Interval('m9'), Interval('A9'), Interval('A11'), Interval('m13')],
+                'vi': [Interval('M13')],
+                'vii': [],
             }
             
         elif self.quality == 'minor':
             intervals_map = {
-                1: [Interval('M13')],
-                2: [],
-                3: [Interval('A11')],
-                4: [],
-                5: [Interval('M9'), Interval('A11')],
-                6: [],
-                7: [],
+                'i': [Interval('M13')],
+                'ii': [],
+                'iii': [Interval('A11')],
+                'iv': [],
+                'v': [Interval('M9'), Interval('A11')],
+                'vi': [],
+                'vii': [],
             }
 
         base = self.note(number)
@@ -400,10 +423,10 @@ class Scale:
         return self.available_tension_note_primary(number) + self.available_tension_note_secondary(number)
 
     def possible_numbers(self):
-        return [1, 2, 3, 4, 5, 6]
+        return ['i', 'ii', 'iii', 'iv', 'v', 'vi']
     
     def possible_cadences(self):
-        return [1, 5]
+        return ['i', 'v']
 
 
 if __name__ == '__main__':
