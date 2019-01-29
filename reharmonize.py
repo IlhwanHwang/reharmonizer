@@ -33,19 +33,13 @@ class ChordDag:
         for n in self.nodes:
             n.prev = []
 
-        transitions = scale.transitions
-        inv_transitions = { number: [] for number in transitions.keys() }
-        for src, dests in transitions.items():
-            for dest in dests:
-                inv_transitions[dest].append(src)
-        
         nodes_at_ending = defaultdict(list)
         for n in self.nodes:
             nodes_at_ending[n.start + n.length].append(n)
         
         for n in self.nodes:
             for m in nodes_at_ending[n.start]:
-                if m.number in inv_transitions[n.number]:
+                if scale.is_transitable(m.number, n.number):
                     n.prev.append(m)
 
     def solve(self, scale):
@@ -68,7 +62,7 @@ class ChordDag:
         while node:
             result.insert(0, node)
             node = node.target
-        
+
         return result
 
 
@@ -139,26 +133,18 @@ def _song_to_chord(song, scale, granularity=(1, 2, 4),
         'iv': 0.2,
         'v': 0.2,
         'vi': -0.2,
-        'i7': 0.2,
-        'ii7': -0.2,
-        'iii7': -0.2,
-        'iv7': 0.2,
-        'v7': 0.2,
-        'vi7': -0.2,
         'v7/ii': -0.2,
         'v7/iii': -0.2,
         'v7/iv': -0.2,
         'v7/v': -0.2,
         'v7/vi': -0.2,
     }
+    number_advantage = { k: 0 for k in number_advantage }
 
     for g in granularity:
         timing = offset
         while timing < time_max:
             part = list(_slice_melody(melody, timing, g))
-            for k in part:
-                if k.length > g:
-                    print("?????")
             weight = _get_melody_weight(part)
             scores = []
             for number in numbers:

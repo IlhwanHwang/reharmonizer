@@ -1,6 +1,6 @@
 from note import chord
 from singable import MultiKey, Key, Enumerate, Parallel, AtChannel, Transpose, Amplify, Arpeggio, Repeat
-from note import Note, Interval, MajorScale
+from note import Note, Interval, MajorScale, SimpleMajorScale
 from reharmonize import reharmonize
 
 
@@ -133,23 +133,24 @@ progression = reharmonize(song, MajorScale(tonic=Note('C5')))
 song = Parallel()([
     AtChannel(0)(song),
     AtChannel(1)(
-        Arpeggio()(
-            (
-                Transpose(Interval('-P15'))(progression),
-                Repeat(12)(
-                    Enumerate()([
-                        Key(length=1/2, note=Note('C4')),
-                        Key(length=1/2, note=Note('C##4')),
-                        Key(length=1/2, note=Note('C#4')),
-                        Key(length=1/2, note=Note('C##4')),
-                        Key(length=1/2, note=Note('C4')),
-                        Key(length=1/2, note=Note('C##4')),
-                        Key(length=1/2, note=Note('C#4')),
-                        Key(length=1/2, note=Note('C##4')),
-                    ])
-                )
-            )
-        )
+        Transpose(Interval('-P15'))(progression)
+        # Arpeggio()(
+        #     (
+        #         Transpose(Interval('-P15'))(progression),
+        #         Repeat(8)(
+        #             Enumerate()([
+        #                 Key(length=1/2, note=Note('C4')),
+        #                 Key(length=1/2, note=Note('C##4')),
+        #                 Key(length=1/2, note=Note('C#4')),
+        #                 Key(length=1/2, note=Note('C##4')),
+        #                 Key(length=1/2, note=Note('C4')),
+        #                 Key(length=1/2, note=Note('C##4')),
+        #                 Key(length=1/2, note=Note('C#4')),
+        #                 Key(length=1/2, note=Note('C##4')),
+        #             ])
+        #         )
+        #     )
+        # )
     )
 ])
 
@@ -177,12 +178,12 @@ mid = to_midi(song, instruments={
 })
 mid.save('new_song.mid')
 
-# import os
-# import subprocess
-# FNULL = open(os.devnull, 'w')
-# subprocess.call(['timidity', 'new_song.mid'], stdout=FNULL, stderr=subprocess.STDOUT)
+import os
+import subprocess
+FNULL = open(os.devnull, 'w')
+subprocess.call(['timidity', 'new_song.mid'], stdout=FNULL, stderr=subprocess.STDOUT)
 
-import mido
-port = mido.open_output()
-for msg in mid.play():
-    port.send(msg)
+# import mido
+# port = mido.open_output()
+# for msg in mid.play():
+#     port.send(msg)

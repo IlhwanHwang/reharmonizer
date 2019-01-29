@@ -287,14 +287,19 @@ def chord(c, octave=4):
 
 class Scale:
 
+    transitions = {}
+
     def __init__(self, tonic=None):
         # TODO: check quality syntax
         self.tonic = tonic
 
     def number_to_int(self, number):
-        if number[-1] == '7':
-            number = number[:-1]
-        return ['i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii'].index(number.lower()) + 1
+        if number[0:3] == 'v7/':
+            number = number[3:]
+            return ['i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii'].index(number.lower()) + 6
+        else:
+            number = self._sanitize_seventh(number)
+            return ['i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii'].index(number.lower()) + 1
 
     def note(self, number):
         if isinstance(number, str):
@@ -331,11 +336,11 @@ class Scale:
 
     def chord(self, number):
         number = number.lower()
-        if re.match(r'(i|ii|iii|iv|v|vi|vii)(7)?', number):
-            base_num, seventh = re.match(r'(i|ii|iii|iv|v|vi|vii)(7)?', number).groups()
+        if re.match(r'(vii|iii|iv|vi|ii|i|v)(7)?', number):
+            base_num, seventh = re.match(r'(vii|iii|iv|vi|ii|i|v)(7)?', number).groups()
             return self.diatonic(base_num, include_seventh=(True if seventh else False))
-        elif re.match(r'v7/(i|ii|iii|iv|v|vi|vii)', number):
-            base_num = re.match(r'v7/(i|ii|iii|iv|v|vi|vii)', number).groups()
+        elif re.match(r'v7/(vii|iii|iv|vi|ii|i|v)', number):
+            base_num = re.match(r'v7/(vii|iii|iv|vi|ii|i|v)', number).groups()
             return self.secondary_dominant(base_num)
         else:
             raise ValueError('No matching chord like "{}"'.format(number))
@@ -354,17 +359,25 @@ class Scale:
     
     def possible_cadences(self):
         return None
+    
+    def _sanitize_seventh(self, c):
+        if c[-1] == '7':
+            return c[:-1]
+        return c
 
+    def is_transitable(self, a, b):
+        return self._sanitize_seventh(b) in self.transitions[self._sanitize_seventh(a)]
+        
 
 class MajorScale(Scale):
 
     transitions = {
-        'i': ['i', 'iii', 'vi', 'ii', 'iv', 'v'],
-        'ii': ['ii', 'iii', 'v'],
-        'iii': ['iii', 'vi', 'ii', 'iv'],
-        'iv': ['iv', 'i', 'iii', 'ii', 'v'],
-        'v': ['v', 'i', 'iii', 'vi'],
-        'vi': ['vi', 'iii', 'ii', 'iv'],
+        'i': ['i', 'iii', 'v7/iii', 'vi', 'v7/vi', 'ii', 'v7/ii', 'iv', 'v7/iv', 'v', 'v7/v'],
+        'ii': ['ii', 'iii', 'v7/iii', 'v', 'v7/v'],
+        'iii': ['iii', 'vi', 'v7/vi', 'ii', 'v7/ii', 'iv', 'v7/iv'],
+        'iv': ['iv', 'i', 'iii', 'v7/iii', 'ii', 'v7/ii', 'v', 'v7/v'],
+        'v': ['v', 'i', 'iii', 'v7/iii', 'vi', 'v7/vi'],
+        'vi': ['vi', 'iii', 'v7/iii', 'ii', 'v7/ii', 'iv', 'v7/iv'],
         'v7/ii': ['ii'],
         'v7/iii': ['iii'],
         'v7/iv': ['iv'],
@@ -426,10 +439,22 @@ class MajorScale(Scale):
         return [base + intv for intv in intervals_map[number]]
     
     def possible_numbers(self):
-        return ['i7', 'ii7', 'iii7', 'iv7', 'v7', 'vi7', 'v7/ii', 'v7/iii', 'v7/iv', 'v7/v', 'v7/vi']
+        return ['i', 'ii', 'iii', 'iv', 'v', 'vi', 'v7/ii', 'v7/iii', 'v7/iv', 'v7/v', 'v7/vi']
     
     def possible_cadences(self):
         return ['i', 'v']
+
+
+class SimpleMajorScale(MajorScale):
+
+    transitions = {
+        'i': ['i', 'iv', 'v'],
+        'iv': ['i', 'iv', 'v'],
+        'v': ['i', 'iv', 'v'],
+    }
+
+    def possible_numbers(self):
+        return ['i', 'iv', 'v']
 
 
 class NaturalMinorScale(Scale):
