@@ -163,11 +163,15 @@ def _song_to_chord(song, scale, granularity=(1, 2, 4),
 
 from singable import MultiKey, Enumerate
 
-
-def reharmonize(song, scale, granularity=(1, 2, 4)):
+def reharmonize(song, scale, granularity=(1, 2, 4), return_chord=False):
     nodes = _song_to_chord(song, scale, granularity=granularity)
     progression = []
     for n in nodes:
         c = scale.diatonic(n.number)
         progression.append(MultiKey(notes=c, length=n.length))
-    return Enumerate()(progression)
+    
+    if return_chord:
+        chord = [(scale.chord_canonical(n.number), n.length) for n in nodes ]
+        return Enumerate()(progression), chord
+    else:
+        return Enumerate()(progression)

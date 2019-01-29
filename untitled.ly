@@ -2,6 +2,35 @@
 	\new
 	GrandStaff
 	<<
+		\chords {
+			c2
+			e2:m
+			f2
+			e2:m
+			f2
+			c2
+			d4:m
+			g4
+			c2
+			e2:m
+			f2
+			c2
+			d2:m
+			e2:m
+			f2
+			c2
+			d4:m
+			g4
+			c2
+			e2:m
+			f2
+			e2:m
+			f2
+			c2
+			d4:m
+			g4
+			c2
+		}
 		\new
 		Staff
 		{

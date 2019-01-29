@@ -356,7 +356,25 @@ def to_midi(
 from collections import defaultdict
 from math import log2, floor
 
-def to_lilypond(singable):
+
+def _length_notation(length):
+    return {
+        0.125: '32',
+        0.25: '16',
+        0.375: '16.',
+        0.5: '8',
+        0.75: '8.',
+        0.875: '8..',
+        1: '4',
+        1.5: '4.',
+        1.75: '4..',
+        2: '2',
+        3: '2.',
+        3.5: '2..',
+        4: '1',
+    }[length]
+
+def to_lilypond(singable, chords=None):
     result = defaultdict(list)
     channels = defaultdict(lambda: defaultdict(list))
     for k in singable.sing():
@@ -378,6 +396,13 @@ def to_lilypond(singable):
                 result[channel].append([Key(start=timing + length, length=rest, note=None, channel=channel)])
 
     output_channels = { 'header': '<<', 'footer': '>>', 'body': [] }
+    
+    output_chords = { 'header': '\\chords {', 'footer': '}', 'body': [] }
+    for chord, length in chords:
+        output_chords['body'].append(chord.to_lilypond(length))
+
+    output_channels['body'].append(output_chords)
+
     for channel, keys in result.items():
         output_staff = ['\\new', 'Staff', { 'header': '{', 'footer': '}', 'body': [] } ]
         output_staff[2]['body'].append('\\time')
@@ -398,21 +423,7 @@ def to_lilypond(singable):
             
             length = k[0].length
             # TODO: allow non-ordinary lengths
-            time = {
-                0.125: '32',
-                0.25: '16',
-                0.375: '16.',
-                0.5: '8',
-                0.75: '8.',
-                0.875: '8..',
-                1: '4',
-                1.5: '4.',
-                1.75: '4..',
-                2: '2',
-                3: '2.',
-                3.5: '2..',
-                4: '1',
-            }[length]
+            time = _length_notation(length)
 
             if not is_rest:
                 output_chord['footer'] += time

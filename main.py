@@ -128,7 +128,7 @@ song = Enumerate()([
 # ])
 
 
-progression = reharmonize(song, MajorScale(tonic=Note('C5')))
+progression, chords = reharmonize(song, MajorScale(tonic=Note('C5')), return_chord=True)
 
 song = Parallel()([
     AtChannel(0)(song),
@@ -161,7 +161,7 @@ from instruments.drum_kits import standard_drum_kit
 
 from singable import to_lilypond
 
-s = to_lilypond(song)
+s = to_lilypond(song, chords=chords)
 with open('untitled.ly', 'w') as f:
     f.write(s)
 

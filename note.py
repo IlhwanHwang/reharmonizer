@@ -222,62 +222,98 @@ class Note:
         return { 3: '#x', 2: 'x', 1: '#', 0: '', -1: 'b', -2: 'bb', -3: 'bbb' }[semitones]
 
 
-def chord(c, octave=4):
-    symbol_map = {
-        'm': 'minor', 'min': 'minor', '-': 'minor',
-        'M': 'major', 'Ma': 'major', 'Maj': 'major', 'maj': 'major',
-        '+': 'augumented', 'aug': 'augumented',
-        'o': 'diminished', 'dim': 'diminished',
-        'sus2': 'sus2', 'sus4': 'sus4',
-        '7': '7', 'dom': '7',
-        'M7': '7major', 'maj7': '7major',
-        'b5': 'b5',
-    }
-    symbols = [re.escape(sym) for sym in reversed(sorted(symbol_map.keys()))]
-    base = c[0]
-    matched = re.findall('{}'.format('|'.join(symbols)), c[1:])
-    
-    # TODO: add chord notation syntax check
-    quality = set()
-    for sym in matched:
-        quality.add(symbol_map[sym])
-    
-    result = { 1: Note(octave=octave, tone=base) }
+from singable import _length_notation
 
-    if 'major' in quality or ('minor' not in quality and 'augumented' not in quality and 'diminished' not in quality):
-        result[3] = result[1] + Interval('M3')
-        result[5] = result[1] + Interval('P5')
-    
-    if 'minor' in quality:
-        result[3] = result[1] + Interval('m3')
-        result[5] = result[1] + Interval('P5')
 
-    if 'augumented' in quality:
-        result[3] = result[1] + Interval('M3')
-        result[5] = result[1] + Interval('A5')
+class Chord:
+    def __init__(self, base, *args):
+        self.base = base
+        self.tags = args
+
+    def to_lilypond(self, length):
+        tag_map = {
+            '7': '7',
+            'M7': 'M7',
+            'minor': 'm'
+        }
+        tag_string = ''.join((tag_map.get(t, '') for t in self.tags))
+        return self.base.lower() + _length_notation(length) + ((':' + tag_string) if tag_string else '')
+
+    def to_notes(self, octave=4):
+        result = { 1: Note(octave=octave, tone=self.base) }
+
+        if 'major' in self.tags:
+            result[3] = result[1] + Interval('M3')
+            result[5] = result[1] + Interval('P5')
+        
+        if 'minor' in self.tags:
+            result[3] = result[1] + Interval('m3')
+            result[5] = result[1] + Interval('P5')
+
+        if 'augumented' in self.tags:
+            result[3] = result[1] + Interval('M3')
+            result[5] = result[1] + Interval('A5')
+        
+        if 'diminished' in self.tags:
+            result[3] = result[1] + Interval('m3')
+            result[5] = result[1] + Interval('d5')
+        
+        if '7' in self.tags:
+            result[7] = result[1] + Interval('m7')
+        
+        if '7major' in self.tags:
+            result[7] = result[1] + Interval('M7')
+        
+        if 'b5' in self.tags:
+            result[5] = result[1] + Interval('d5')
+        
+        if 'sus2' in self.tags:
+            del result[3]
+            result[2] = result[1] + Interval('M2')
+        
+        if 'sus4' in self.tags:
+            del result[3]
+            result[4] = result[1] + Interval('P4')
+        
+        return tuple([result[k] for k in sorted(result.keys())])
+
+    @staticmethod
+    def from_notation(notation):
+        symbol_map = {
+            'm': 'minor', 'min': 'minor', '-': 'minor',
+            'M': 'major', 'Ma': 'major', 'Maj': 'major', 'maj': 'major',
+            '+': 'augumented', 'aug': 'augumented',
+            'o': 'diminished', 'dim': 'diminished',
+            'sus2': 'sus2', 'sus4': 'sus4',
+            '7': '7', 'dom': '7',
+            'M7': '7major', 'maj7': '7major',
+            'b5': 'b5',
+        }
+        symbols = [re.escape(sym) for sym in reversed(sorted(symbol_map.keys()))]
+        base = notation[0]
+        matched = re.findall('{}'.format('|'.join(symbols)), notation[1:])
+        
+        # TODO: add chord notation syntax check
+        tags = set()
+        for sym in matched:
+            tags.add(symbol_map[sym])
+        
+        if 'major' not in tags and ('minor' not in tags and 'augumented' not in tags and 'diminished' not in tags):
+            tags.add('major')
+        
+        return Chord(base, *tags)
     
-    if 'diminished' in quality:
-        result[3] = result[1] + Interval('m3')
-        result[5] = result[1] + Interval('d5')
-    
-    if '7' in quality:
-        result[7] = result[1] + Interval('m7')
-    
-    if '7major' in quality:
-        result[7] = result[1] + Interval('M7')
-    
-    if 'b5' in quality:
-        result[5] = result[1] + Interval('d5')
-    
-    if 'sus2' in quality:
-        del result[3]
-        result[2] = result[1] + Interval('M2')
-    
-    if 'sus4' in quality:
-        del result[3]
-        result[4] = result[1] + Interval('P4')
-    
-    return tuple([result[k] for k in sorted(result.keys())])
+    @staticmethod
+    def from_notes(notes):
+        if notes[1] - notes[0] == Interval('M3') and notes[2] - notes[0] == Interval('P5'):
+            return Chord(notes[0].tone, 'major')
+        elif notes[1] - notes[0] == Interval('m3') and notes[2] - notes[0] == Interval('P5'):
+            return Chord(notes[0].tone, 'minor')
+        # TODO: do full support on note conversion
+
+
+def chord(notation, octave=4):
+    return Chord.from_notation(notation).to_notes(octave=octave)
 
 
 # def chord_to_notation(c):
@@ -333,6 +369,9 @@ class Scale:
         for _ in range(extend):
             base += Interval('P5')
         return chord(str(base.replace(octave='')) + '7')
+
+    def chord_canonical(self, number):
+        return Chord.from_notes(self.chord(number))
 
     def chord(self, number):
         number = number.lower()
