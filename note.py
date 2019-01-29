@@ -369,19 +369,19 @@ class Scale:
         base = self.note(index) + Interval('P5')
         for _ in range(extend):
             base += Interval('P5')
-        return chord(str(base.replace(octave='')) + '7')
+        return chord(base.tone + '7')
 
     def chord_canonical(self, number):
         return Chord.from_notes(self.chord(number))
 
     def chord(self, number):
         number = number.lower()
-        if re.match(r'(vii|iii|iv|vi|ii|i|v)(7)?', number):
+        if re.match(r'^(vii|iii|iv|vi|ii|i|v)(7)?$', number):
             base_num, seventh = re.match(r'(vii|iii|iv|vi|ii|i|v)(7)?', number).groups()
             return self.diatonic(base_num, include_seventh=(True if seventh else False))
-        elif re.match(r'v7/(vii|iii|iv|vi|ii|i|v)', number):
+        elif re.match(r'^v7/(vii|iii|iv|vi|ii|i|v)$', number):
             base_num = re.match(r'v7/(vii|iii|iv|vi|ii|i|v)', number).groups()
-            return self.secondary_dominant(base_num)
+            return self.secondary_dominant(number)
         else:
             raise ValueError('No matching chord like "{}"'.format(number))
 

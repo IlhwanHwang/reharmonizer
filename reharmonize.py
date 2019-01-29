@@ -167,7 +167,7 @@ def reharmonize(song, scale, granularity=(1, 2, 4), return_chord=False):
     nodes = _song_to_chord(song, scale, granularity=granularity)
     progression = []
     for n in nodes:
-        c = scale.diatonic(n.number)
+        c = scale.chord(n.number)
         progression.append(MultiKey(notes=c, length=n.length))
     
     if return_chord:
