@@ -224,24 +224,14 @@ class Note:
 
 def chord(c, octave=4):
     symbol_map = {
-        'm': 'minor',
-        'min': 'minor',
-        '-': 'minor',
-        'M': 'major',
-        'Ma': 'major',
-        'Maj': 'major',
-        'maj': 'major',
-        '+': 'augumented',
-        'aug': 'augumented',
-        'o': 'diminished',
-        'dim': 'diminished',
-        'sus2': 'sus2',
-        'sus4': 'sus4',
+        'm': 'minor', 'min': 'minor', '-': 'minor',
+        'M': 'major', 'Ma': 'major', 'Maj': 'major', 'maj': 'major',
+        '+': 'augumented', 'aug': 'augumented',
+        'o': 'diminished', 'dim': 'diminished',
+        'sus2': 'sus2', 'sus4': 'sus4',
+        '7': '7', 'dom': '7',
+        'M7': '7major', 'maj7': '7major',
         'b5': 'b5',
-        '7': '7',
-        'M7': '7major',
-        'maj7': '7major',
-        'dom': '7',
     }
     symbols = [re.escape(sym) for sym in reversed(sorted(symbol_map.keys()))]
     base = c[0]
@@ -302,6 +292,8 @@ class Scale:
         self.tonic = tonic
 
     def number_to_int(self, number):
+        if number[-1] == '7':
+            number = number[:-1]
         return ['i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii'].index(number.lower()) + 1
 
     def note(self, number):
@@ -340,10 +332,10 @@ class Scale:
     def chord(self, number):
         number = number.lower()
         if re.match(r'(i|ii|iii|iv|v|vi|vii)(7)?', number):
-            _, base_num, seventh = re.match(r'(i|ii|iii|iv|v|vi|vii)(7)?', number).groups()
+            base_num, seventh = re.match(r'(i|ii|iii|iv|v|vi|vii)(7)?', number).groups()
             return self.diatonic(base_num, include_seventh=(True if seventh else False))
         elif re.match(r'v7/(i|ii|iii|iv|v|vi|vii)', number):
-            _, base_num = re.match(r'v7/(i|ii|iii|iv|v|vi|vii)', number).groups()
+            base_num = re.match(r'v7/(i|ii|iii|iv|v|vi|vii)', number).groups()
             return self.secondary_dominant(base_num)
         else:
             raise ValueError('No matching chord like "{}"'.format(number))
@@ -364,8 +356,21 @@ class Scale:
         return None
 
 
-
 class MajorScale(Scale):
+
+    transitions = {
+        'i': ['i', 'iii', 'vi', 'ii', 'iv', 'v'],
+        'ii': ['ii', 'iii', 'v'],
+        'iii': ['iii', 'vi', 'ii', 'iv'],
+        'iv': ['iv', 'i', 'iii', 'ii', 'v'],
+        'v': ['v', 'i', 'iii', 'vi'],
+        'vi': ['vi', 'iii', 'ii', 'iv'],
+        'v7/ii': ['ii'],
+        'v7/iii': ['iii'],
+        'v7/iv': ['iv'],
+        'v7/v': ['v'],
+        'v7/vi': ['vi'],
+    }
 
     def note_interval(self, index):
         return {
@@ -380,6 +385,8 @@ class MajorScale(Scale):
 
     def available_tension_note_primary(self, number):
         number = number.lower()
+        if number[-1] == '7':
+            number = number[:-1]
         intervals_map = {
             'i': [Interval('M9'), Interval('M13')],
             'ii': [Interval('M9'), Interval('P11')],
@@ -388,12 +395,19 @@ class MajorScale(Scale):
             'v': [Interval('M9'), Interval('M13')],
             'vi': [Interval('M9'), Interval('P11')],
             'vii': [Interval('P11'), Interval('m13')],
+            'v7/ii': [Interval('m9'), Interval('M9'), Interval('A9'), Interval('m13')],
+            'v7/iii': [Interval('m9'), Interval('A9'), Interval('m13')],
+            'v7/iv': [Interval('M9'), Interval('M13')],
+            'v7/v': [Interval('M9'), Interval('M13')],
+            'v7/vi': [Interval('m9'), Interval('A9'), Interval('m13')],
         }
         base = self.note(number)
         return [base + intv for intv in intervals_map[number]]
     
     def available_tension_note_secondary(self, number):
         number = number.lower()
+        if number[-1] == '7':
+            number = number[:-1]
         intervals_map = {
             'i': [Interval('A11')],
             'ii': [],
@@ -402,12 +416,17 @@ class MajorScale(Scale):
             'v': [Interval('m9'), Interval('A9'), Interval('A11'), Interval('m13')],
             'vi': [Interval('M13')],
             'vii': [],
+            'v7/ii': [Interval('A11'), Interval('M13')],
+            'v7/iii': [Interval('A11')],
+            'v7/iv': [Interval('m9'), Interval('A9'), Interval('A11'), Interval('m13')],
+            'v7/v': [Interval('m9'), Interval('A9'), Interval('A11'), Interval('m13')],
+            'v7/vi': [Interval('M9'), Interval('A11')],
         }
         base = self.note(number)
         return [base + intv for intv in intervals_map[number]]
     
     def possible_numbers(self):
-        return ['i', 'ii', 'iii', 'iv', 'v', 'vi']
+        return ['i7', 'ii7', 'iii7', 'iv7', 'v7', 'vi7', 'v7/ii', 'v7/iii', 'v7/iv', 'v7/v', 'v7/vi']
     
     def possible_cadences(self):
         return ['i', 'v']

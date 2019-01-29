@@ -29,18 +29,11 @@ class ChordDag:
     def add_node(self, number, value, start, length):
         self.nodes.append(ChordNode(number, value, start, length))
     
-    def _build_edge(self):
+    def _build_edge(self, scale):
         for n in self.nodes:
             n.prev = []
 
-        transitions = {
-            'i': ['i', 'iii', 'vi', 'ii', 'iv', 'v'],
-            'ii': ['ii', 'iii', 'v'],
-            'iii': ['iii', 'vi', 'ii', 'iv'],
-            'iv': ['iv', 'i', 'iii', 'ii', 'v'],
-            'v': ['v', 'i', 'iii', 'vi'],
-            'vi': ['vi', 'iii', 'ii', 'iv']
-        }
+        transitions = scale.transitions
         inv_transitions = { number: [] for number in transitions.keys() }
         for src, dests in transitions.items():
             for dest in dests:
@@ -55,8 +48,8 @@ class ChordDag:
                 if m.number in inv_transitions[n.number]:
                     n.prev.append(m)
 
-    def solve(self):
-        self._build_edge()
+    def solve(self, scale):
+        self._build_edge(scale)
         topological_nodes = sorted(self.nodes, key=lambda n: n.start)
 
         for n in topological_nodes:
@@ -87,7 +80,7 @@ def _score_melody(scale, melody, number, weight=None, score_consonance=1, score_
     if not melody:
         return 0
 
-    base = scale.diatonic(number, include_seventh=True)
+    base = scale.chord(number)
     primary = scale.available_tension_note_primary(number)
     secondary = scale.available_tension_note_secondary(number)
     
@@ -146,6 +139,17 @@ def _song_to_chord(song, scale, granularity=(1, 2, 4),
         'iv': 0.2,
         'v': 0.2,
         'vi': -0.2,
+        'i7': 0.2,
+        'ii7': -0.2,
+        'iii7': -0.2,
+        'iv7': 0.2,
+        'v7': 0.2,
+        'vi7': -0.2,
+        'v7/ii': -0.2,
+        'v7/iii': -0.2,
+        'v7/iv': -0.2,
+        'v7/v': -0.2,
+        'v7/vi': -0.2,
     }
 
     for g in granularity:
@@ -168,7 +172,7 @@ def _song_to_chord(song, scale, granularity=(1, 2, 4),
                 dag.add_node(number, score, timing, g)
             timing += g
     
-    return dag.solve()
+    return dag.solve(scale)
 
 
 from singable import MultiKey, Enumerate
