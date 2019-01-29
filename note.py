@@ -236,6 +236,7 @@ class Chord:
             'M7': 'M7',
             'minor': 'm'
         }
+        # TODO: more tag represetation
         tag_string = ''.join((tag_map.get(t, '') for t in self.tags))
         return self.base.lower() + _length_notation(length) + ((':' + tag_string) if tag_string else '')
 
