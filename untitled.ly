@@ -84,32 +84,32 @@
 		{
 			\time
 			4/4
-			<g, bis, d>2
-			<g, bis, d>4
-			<a, c eis>4
-			<d fes a>1
-			<g, bis, d>2
-			<g, bis, d>4
-			<a, c eis>4
-			<a, c eis>2
-			<d fes a>2
-			<g, bis, d>2
-			<g, bis, d>4
-			<a, c eis>4
-			<a, c eis>2
-			<a, c eis>4
-			<d fes a>4
-			<g, bis, d>2
+			<g, bes, d>2
+			<g, bes, d>4
+			<a, c ees>4
+			<d fis a>1
+			<g, bes, d>2
+			<g, bes, d>4
+			<a, c ees>4
+			<a, c ees>2
+			<d fis a>2
+			<g, bes, d>2
+			<g, bes, d>4
+			<a, c ees>4
+			<a, c ees>2
+			<a, c ees>4
+			<d fis a>4
+			<g, bes, d>2
 			<f a c'>2
-			<g, bis, d>1
-			<c eis g>2
-			<g, bis, d>2
-			<c eis g>2
-			<g, bis, d>2
-			<a, c eis>2
-			<d, fes, a, c>4
-			<bis, d f>4
-			<g, bis, d>1
+			<g, bes, d>1
+			<c ees g>2
+			<g, bes, d>2
+			<c ees g>2
+			<g, bes, d>2
+			<a, c ees>2
+			<d, fis, a, c>4
+			<bes, d f>4
+			<g, bes, d>1
 		}
 	>>
 }

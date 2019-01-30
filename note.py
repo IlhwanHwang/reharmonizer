@@ -177,7 +177,7 @@ class Note:
                 semitones_interval = other.get_semitones()
                 semitones_neutral = note_neutral.midi_number() - self.midi_number()
 
-                return Note(octave=octave_result, tone=tone_result, semitones=semitones_interval + semitones_neutral)
+                return Note(octave=octave_result, tone=tone_result, semitones=-(semitones_interval + semitones_neutral))
 
         else:
             raise ValueError('Need to add Interval and Note')
@@ -317,6 +317,8 @@ class Chord:
             tags.add('augumented')
         elif notes[1] - notes[0] == Interval('m3') and notes[2] - notes[0] == Interval('d5'):
             tags.add('diminished')
+        else:
+            raise ValueError('Unparsable notes')
         
         if len(notes) >= 4:
             if notes[3] - notes[0] == Interval('M7'):

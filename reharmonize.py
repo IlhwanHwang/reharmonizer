@@ -173,7 +173,7 @@ def reharmonize(song, scale, granularity=(1, 2, 4), return_chord=False):
         progression.append(MultiKey(notes=c, length=n.length))
     
     if return_chord:
-        chord = [(scale.chord_canonical(n.number), n.length) for n in nodes ]
+        chord = [(scale.chord_canonical(n.number), n.length) for n in nodes]
         return Enumerate()(progression), chord
     else:
         return Enumerate()(progression)

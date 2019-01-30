@@ -200,7 +200,7 @@ from reharmonize import reharmonize
 #     Key(length=1/2, note=Note('E5')),
 #     Key(length=1/2, note=Note('D#5')),
 #     Key(length=1/2, note=Note('E5')),
-#     Key(length=1/2, note=Note('F5')),
+#     Key(length=1/2, note=Note('F#5')),
 #     Key(length=1/2, note=Note('D#5')),
 #     Key(length=1, note=Note('E5')),
 #     Key(length=1, note=Note('D#5')),
