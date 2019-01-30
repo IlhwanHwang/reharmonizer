@@ -133,11 +133,13 @@ def _song_to_chord(song, scale, granularity=(1, 2, 4),
         'iv': 0.2,
         'v': 0.2,
         'vi': -0.2,
+        'vii': -0.2,
         'v7/ii': -0.2,
         'v7/iii': -0.2,
         'v7/iv': -0.2,
         'v7/v': -0.2,
         'v7/vi': -0.2,
+        'v7/vii': -0.2,
     }
     number_advantage = { k: 0 for k in number_advantage }
 

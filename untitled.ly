@@ -2,42 +2,81 @@
 	\new
 	GrandStaff
 	<<
-		\chords {e2:m d4:m e4:m f2 g2 g4 c4 c2 d2:m g2 c2 d4:m g4 c2 f2 g1 c1}
+		\chords {
+			g2:m
+			g4:m
+			a4:dim
+			d1
+			g2:m
+			g4:m
+			a4:dim
+			a2:dim
+			d2
+			g2:m
+			g4:m
+			a4:dim
+			a2:dim
+			a4:dim
+			d4
+			g2:m
+			f2
+			g1:m
+			c2:m
+			g2:m
+			c2:m
+			g2:m
+			a2:dim
+			d4:7
+			b4
+			g1:m
+		}
 		\new
 		Staff
 		{
 			\time
 			4/4
-			<g'>4
-			<g'>4
-			<e'>8
-			<f'>8
-			<g'>4
+			<g'>2.
 			<a'>4
-			<a'>4
+			<ges'>2
+			r2
 			<g'>2
-			<g'>4
-			<c''>4
-			<e''>4
-			<d''>8
+			<g'>8.
+			<a'>8.
 			<c''>8
-			<d''>2.
-			r4
-			<e''>4
-			<e''>4
-			<d''>4
-			<d''>4
+			<a'>2
+			<d''>2
+			<bes'>2.
 			<c''>4
-			<d''>8
-			<c''>8
 			<a'>4
 			<a'>4
-			<g'>4
-			<g'>4
-			<g'>4
-			<e'>8
-			<d'>8
-			<c'>2.
+			<c''>4
+			<ges''>4
+			<g''>8
+			<d''>8
+			<bes'>8
+			<a''>4
+			<f''>8
+			<c''>4
+			<g''>1
+			<c''>8
+			<c''>8
+			<c''>8
+			<c''>8
+			<c''>8
+			<bes'>4
+			<c''>4
+			<c''>8
+			<c''>8
+			<c''>8
+			<c''>8
+			<bes'>4.
+			<c''>8
+			<c''>8
+			<c''>8
+			<c''>8
+			<c''>8
+			<d''>8
+			<bes'>1
 			r4
 		}
 		\new
@@ -45,23 +84,32 @@
 		{
 			\time
 			4/4
-			<e g b>2
-			<d f a>4
-			<e g b>4
+			<g, bis, d>2
+			<g, bis, d>4
+			<a, c eis>4
+			<d fes a>1
+			<g, bis, d>2
+			<g, bis, d>4
+			<a, c eis>4
+			<a, c eis>2
+			<d fes a>2
+			<g, bis, d>2
+			<g, bis, d>4
+			<a, c eis>4
+			<a, c eis>2
+			<a, c eis>4
+			<d fes a>4
+			<g, bis, d>2
 			<f a c'>2
-			<g b d'>2
-			<g b d'>4
-			<c e g>4
-			<c e g>2
-			<d f a>2
-			<g b d'>2
-			<c e g>2
-			<d f a>4
-			<g b d'>4
-			<c e g>2
-			<f a c'>2
-			<g b d'>1
-			<c e g>1
+			<g, bis, d>1
+			<c eis g>2
+			<g, bis, d>2
+			<c eis g>2
+			<g, bis, d>2
+			<a, c eis>2
+			<d, fes, a, c>4
+			<bis, d f>4
+			<g, bis, d>1
 		}
 	>>
 }

@@ -234,7 +234,8 @@ class Chord:
         tag_map = {
             '7': '7',
             'M7': 'M7',
-            'minor': 'm'
+            'minor': 'm',
+            'diminished': 'dim',
         }
         # TODO: more tag represetation
         tag_string = ''.join((tag_map.get(t, '') for t in self.tags))
@@ -306,10 +307,25 @@ class Chord:
     
     @staticmethod
     def from_notes(notes):
+        tags = set()
+
         if notes[1] - notes[0] == Interval('M3') and notes[2] - notes[0] == Interval('P5'):
-            return Chord(notes[0].tone, 'major')
+            tags.add('major')
         elif notes[1] - notes[0] == Interval('m3') and notes[2] - notes[0] == Interval('P5'):
-            return Chord(notes[0].tone, 'minor')
+            tags.add('minor')
+        elif notes[1] - notes[0] == Interval('M3') and notes[2] - notes[0] == Interval('A5'):
+            tags.add('augumented')
+        elif notes[1] - notes[0] == Interval('m3') and notes[2] - notes[0] == Interval('d5'):
+            tags.add('diminished')
+        
+        if len(notes) >= 4:
+            if notes[3] - notes[0] == Interval('M7'):
+                tags.add('7major')
+            elif notes[3] - notes[0] == Interval('m7'):
+                tags.add('7')
+        
+        return Chord(notes[0].tone, *tags)
+
         # TODO: do full support on note conversion
 
 
@@ -369,7 +385,7 @@ class Scale:
         base = self.note(index) + Interval('P5')
         for _ in range(extend):
             base += Interval('P5')
-        return chord(base.tone + '7')
+        return chord(base.tone + '7', octave=self.tonic.octave)
 
     def chord_canonical(self, number):
         return Chord.from_notes(self.chord(number))
@@ -406,23 +422,25 @@ class Scale:
         return c
 
     def is_transitable(self, a, b):
-        return self._sanitize_seventh(b) in self.transitions[self._sanitize_seventh(a)]
+        a = self._sanitize_seventh(a)
+        b = self._sanitize_seventh(b)
+        if a[:3] == 'v7/':
+            return a[3:] == b or a == b
+        elif b[:3] == 'v7/':
+            return b[3:] in self.transitions[a]
+        else:
+            return b in self.transitions[a]
         
 
 class MajorScale(Scale):
 
     transitions = {
-        'i': ['i', 'iii', 'v7/iii', 'vi', 'v7/vi', 'ii', 'v7/ii', 'iv', 'v7/iv', 'v', 'v7/v'],
-        'ii': ['ii', 'iii', 'v7/iii', 'v', 'v7/v'],
-        'iii': ['iii', 'vi', 'v7/vi', 'ii', 'v7/ii', 'iv', 'v7/iv'],
-        'iv': ['iv', 'i', 'iii', 'v7/iii', 'ii', 'v7/ii', 'v', 'v7/v'],
-        'v': ['v', 'i', 'iii', 'v7/iii', 'vi', 'v7/vi'],
-        'vi': ['vi', 'iii', 'v7/iii', 'ii', 'v7/ii', 'iv', 'v7/iv'],
-        'v7/ii': ['ii'],
-        'v7/iii': ['iii'],
-        'v7/iv': ['iv'],
-        'v7/v': ['v'],
-        'v7/vi': ['vi'],
+        'i': ['i', 'iii',  'vi', 'ii', 'iv', 'v'],
+        'ii': ['ii', 'iii', 'v'],
+        'iii': ['iii', 'vi','ii', 'iv'],
+        'iv': ['iv', 'i', 'iii',  'ii', 'v'],
+        'v': ['v', 'i', 'iii',  'vi'],
+        'vi': ['vi', 'iii', 'ii', 'iv'],
     }
 
     def note_interval(self, index):
@@ -499,6 +517,16 @@ class SimpleMajorScale(MajorScale):
 
 class NaturalMinorScale(Scale):
 
+    transitions = {
+        'i': ['i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii'],
+        'ii': ['ii', 'iii', 'v'],
+        'iii': ['i', 'ii', 'iii', 'iv', 'vi'],
+        'iv': ['i', 'ii', 'iv', 'v', 'vii'],
+        'v': ['i', 'iii', 'v', 'vi'],
+        'vi': ['ii', 'iv', 'v', 'vi', 'vii'],
+        'vii': ['i', 'iii', 'v', 'vi', 'vii']
+    }
+
     def note_interval(self, index):
         return {
             1: Interval('P1'),
@@ -512,20 +540,25 @@ class NaturalMinorScale(Scale):
 
     def diatonic(self, number, include_seventh=False):
         if number == 'v':
-            pass
+            return (self.note(5), self.note(7).sharp(), self.note(9))
         else:
             return super(NaturalMinorScale, self).diatonic(number, include_seventh=include_seventh)
 
     def available_tension_note_primary(self, number):
         number = number.lower()
         intervals_map = {
-            'i': [Interval('M9'), Interval('M13')],
+            'i': [Interval('M9'), Interval('P11')],
             'ii': [Interval('P11'), Interval('m13')],
             'iii': [Interval('M9'), Interval('M13')],
             'iv': [Interval('M9'), Interval('P11'), Interval('M13')],
             'v': [Interval('m9'), Interval('A9'), Interval('m13')],
             'vi': [Interval('M9'), Interval('A9'), Interval('M13')],
             'vii': [Interval('M9'), Interval('M13')],
+            'v7/iii': [Interval('M9'), Interval('M13')],
+            'v7/iv': [Interval('m9'), Interval('M9'), Interval('A9'), Interval('m13')],
+            'v7/v': [Interval('m9'), Interval('A9'), Interval('m13')],
+            'v7/vi': [Interval('M9'), Interval('M13')],
+            'v7/vii': [Interval('M9'), Interval('A9'), Interval('M13')],
         }
         base = self.note(number)
         return [base + intv for intv in intervals_map[number]]
@@ -540,12 +573,17 @@ class NaturalMinorScale(Scale):
             'v': [Interval('M9'), Interval('A11')],
             'vi': [],
             'vii': [],
+            'v7/iii': [Interval('m9'), Interval('A11'), Interval('m13')],
+            'v7/iv': [Interval('A11'), Interval('M13')],
+            'v7/v': [Interval('A11')],
+            'v7/vi': [Interval('m9'), Interval('A11'), Interval('m13')],
+            'v7/vii': [Interval('m9'), Interval('A9'), Interval('m13')],
         }
         base = self.note(number)
         return [base + intv for intv in intervals_map[number]]
     
     def possible_numbers(self):
-        return ['i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii']
+        return ['i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii', 'v7/iii', 'v7/iv', 'v7/v', 'v7/vi', 'v7/vii']
     
     def possible_cadences(self):
         return ['i', 'v']
