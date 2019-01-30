@@ -358,6 +358,7 @@ from math import log2, floor
 
 
 def _length_notation(length):
+    # TODO: allow non-ordinary lengths
     return {
         0.125: '32',
         0.25: '16',
@@ -374,7 +375,7 @@ def _length_notation(length):
         4: '1',
     }[length]
 
-def to_lilypond(singable, chords=None):
+def to_lilypond(singable, chords=None, clefs=None):
     result = defaultdict(list)
     channels = defaultdict(lambda: defaultdict(list))
     for k in singable.sing():
@@ -405,6 +406,9 @@ def to_lilypond(singable, chords=None):
 
     for channel, keys in result.items():
         output_staff = ['\\new', 'Staff', { 'header': '{', 'footer': '}', 'body': [] } ]
+        if clefs and channel in clefs:
+            output_staff[2]['body'].append('\\clef')
+            output_staff[2]['body'].append(clefs[channel])
         output_staff[2]['body'].append('\\time')
         output_staff[2]['body'].append('4/4')
         for k in keys:
@@ -422,7 +426,6 @@ def to_lilypond(singable, chords=None):
                 output_chord = 'r'
             
             length = k[0].length
-            # TODO: allow non-ordinary lengths
             time = _length_notation(length)
 
             if not is_rest:
