@@ -105,7 +105,7 @@ def _score_melody(scale, melody, number, weight=None, score_consonance=1, score_
 
 
 def _song_to_chord(song, scale, granularity=(1, 2, 4), 
-                   offset=0, cadence_at=16, cadence_score=1, ):
+                   offset=0, cadence_at=16, cadence_score=1, restrictions=None):
 
     melody = list(song.sing())
 
@@ -146,18 +146,21 @@ def _song_to_chord(song, scale, granularity=(1, 2, 4),
     for g in granularity:
         timing = offset
         while timing < time_max:
-            part = list(_slice_melody(melody, timing, g))
-            weight = _get_melody_weight(part)
-            scores = []
-            for number in numbers:
-                score = _score_melody(scale, part, number, weight)
-                score += number_advantage[number]
-                if (timing + g - offset) % cadence_at == 0:
-                    if number not in scale.possible_cadences():
-                        score -= cadence_score
-                scores.append((number, score))
-            for number, score in scores:
-                dag.add_node(number, score, timing, g)
+            if restrictions and timing in restrictions:
+                dag.add_node(restrictions[timing], 0, timing, g)
+            else:
+                part = list(_slice_melody(melody, timing, g))
+                weight = _get_melody_weight(part)
+                scores = []
+                for number in numbers:
+                    score = _score_melody(scale, part, number, weight)
+                    score += number_advantage[number]
+                    if (timing + g - offset) % cadence_at == 0:
+                        if number not in scale.possible_cadences():
+                            score -= cadence_score
+                    scores.append((number, score))
+                for number, score in scores:
+                    dag.add_node(number, score, timing, g)
             timing += g
     
     return dag.solve(scale)
@@ -165,8 +168,8 @@ def _song_to_chord(song, scale, granularity=(1, 2, 4),
 
 from singable import MultiKey, Enumerate
 
-def reharmonize(song, scale, granularity=(1, 2, 4), return_chord=False):
-    nodes = _song_to_chord(song, scale, granularity=granularity)
+def reharmonize(song, scale, granularity=(1, 2, 4), return_chord=False, restrictions=None):
+    nodes = _song_to_chord(song, scale, granularity=granularity, restrictions=restrictions)
     progression = []
     for n in nodes:
         c = scale.chord(n.number)

@@ -264,7 +264,7 @@ song = Parallel()([
         Arpeggio()(
             (
                 Transpose(Interval('-P15'))(progression),
-                Repeat(12)(
+                Repeat(16)(
                     Enumerate()([
                         Key(length=1/2, note=Note('C4')),
                         Key(length=1/2, note=Note('C##4')),
