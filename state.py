@@ -77,29 +77,50 @@ def find_node(state, identifier):
 
 
 from math import pi, cos, sin
+from PyQt5.QtCore import QPoint
 
 def draw(form, state):
     form.drawfuncs = []
+    
+    def group_sort(nodes):
+        connections = {}
+        for n in nodes:
+            descendant = n.descendant
+            if descendant is None:
+                descendant = []
+            elif isinstance(descendant, tuple):
+                descendant = list(descendant)
+            elif not isinstance(descendant, list):
+                descendant = [descendant]
+            connections[n] = descendant
+        def _group_sort():
+            while connections:
+                out = [n for n in connections.keys() if not connections[n]]
+                yield out[:]
+                for n in connections.keys():
+                    for m in out:
+                        if m in connections[n]:
+                            connections[n].remove(m)
+                while out:
+                    m = out.pop()
+                    del connections[m]
+        return list(reversed(list(_group_sort())))
 
-    dx = 320 - 50
-    dy = 240 - 40
-    r = 200
-    da = pi * 2 / len(state.singables)
-    a = 0
+    ordering = group_sort(state.singables)
 
     widgets = {}
 
-    for s in state.singables:
-        pos = (dx + cos(a) * r, dy + sin(a) * r)
-        w = QSingableNode(s, parent=form)
-        widgets[s] = w
-        w.move(*pos)
-        a += da
+    dx = 100
+    for group in ordering:
+        dy = 100
+        for s in group:
+            w = QSingableNode(s, parent=form)
+            w.move(dx, dy)
+            widgets[s] = w
+            dy += 100
+        dx += 120
 
     def draw_node_lines(painter):
-        def draw_line(p1, p2):
-            painter.drawLine(p1, p2)
-
         for s in state.singables:
             descendants = s.descendant
             if not descendants:
@@ -107,7 +128,9 @@ def draw(form, state):
             if not isinstance(descendants, (list, tuple)):
                 descendants = [descendants]
             for d in descendants:
-                draw_line(widgets[s].pos(), widgets[d].pos())
+                w1 = widgets[s]
+                w2 = widgets[d]
+                painter.drawLine(w1.pos() + QPoint(w1.width(), w1.height() / 2), w2.pos() + QPoint(0, w2.height() / 2))
     
     form.drawfuncs.append(draw_node_lines)
     form.show()
