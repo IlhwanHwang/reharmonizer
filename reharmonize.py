@@ -1,4 +1,4 @@
-from note import Note, Interval, Scale
+from note import Note, Interval
 
 def _get_melody_weight(melody):
     return [key.length for key in melody]
@@ -164,19 +164,3 @@ def _song_to_chord(song, scale, granularity=(1, 2, 4),
             timing += g
     
     return dag.solve(scale)
-
-
-from singable import MultiKey, Enumerate
-
-def reharmonize(song, scale, granularity=(1, 2, 4), return_chord=False, restrictions=None):
-    nodes = _song_to_chord(song, scale, granularity=granularity, restrictions=restrictions)
-    progression = []
-    for n in nodes:
-        c = scale.chord(n.number)
-        progression.append(MultiKey(notes=c, length=n.length))
-    
-    if return_chord:
-        chord = [(scale.chord_canonical(n.number), n.length) for n in nodes]
-        return Enumerate()(progression), chord
-    else:
-        return Enumerate()(progression)

@@ -297,6 +297,34 @@ class _Arpeggio(Singable):
                 channel=arp_key.channel
             )
 
+from reharmonize import _song_to_chord
+
+def reharmonize(song, scale, granularity=(1, 2, 4), return_chord=False, restrictions=None):
+    nodes = _song_to_chord(song, scale, granularity=granularity, restrictions=restrictions)
+    progression = []
+    for n in nodes:
+        c = scale.chord(n.number)
+        progression.append(MultiKey(notes=c, length=n.length))
+    
+    if return_chord:
+        chord = [(scale.chord_canonical(n.number), n.length) for n in nodes]
+        return Enumerate()(progression), chord
+    else:
+        return Enumerate()(progression)
+
+
+class _Reharmonizer(Singable):
+    def __init__(self, child, scale, restrictions=None, granularity=(1, 2, 4)):
+        self.child = child
+        self.scale = scale
+        self.restrictions = restrictions
+        self.granularity = granularity
+    
+    def sing(self):
+        for key in reharmonize(self.child, self.scale, granularity=self.granularity, restrictions=self.restrictions).sing():
+            yield key
+
+    
 Parallel = parameter_graphmaker(_Parallel)
 Enumerate = parameter_graphmaker(_Enumerate)
 Repeat = parameter_graphmaker(_Repeat)
@@ -314,6 +342,7 @@ Swing = parameter_graphmaker(_Swing)
 AtChannel = parameter_graphmaker(_AtChannel)
 AtNote = parameter_graphmaker(_AtNote)
 Arpeggio = parameter_graphmaker(_Arpeggio)
+Reharmonize = parameter_graphmaker(_Reharmonizer)
 
 
 def to_midi(
@@ -355,25 +384,7 @@ def to_midi(
 
 from collections import defaultdict
 from math import log2, floor
-
-
-def _length_notation(length):
-    # TODO: allow non-ordinary lengths
-    return {
-        0.125: '32',
-        0.25: '16',
-        0.375: '16.',
-        0.5: '8',
-        0.75: '8.',
-        0.875: '8..',
-        1: '4',
-        1.5: '4.',
-        1.75: '4..',
-        2: '2',
-        3: '2.',
-        3.5: '2..',
-        4: '1',
-    }[length]
+from utils import length_notation
 
 def to_lilypond(singable, chords=None, clefs=None):
     result = defaultdict(list)
@@ -398,11 +409,12 @@ def to_lilypond(singable, chords=None, clefs=None):
 
     output_channels = { 'header': '<<', 'footer': '>>', 'body': [] }
     
-    output_chords = { 'header': '\\chords {', 'footer': '}', 'body': [] }
-    for chord, length in chords:
-        output_chords['body'].append(chord.to_lilypond(length))
+    if chords:
+        output_chords = { 'header': '\\chords {', 'footer': '}', 'body': [] }
+        for chord, length in chords:
+            output_chords['body'].append(chord.to_lilypond(length))
 
-    output_channels['body'].append(output_chords)
+        output_channels['body'].append(output_chords)
 
     for channel, keys in result.items():
         output_staff = ['\\new', 'Staff', { 'header': '{', 'footer': '}', 'body': [] } ]
@@ -426,7 +438,7 @@ def to_lilypond(singable, chords=None, clefs=None):
                 output_chord = 'r'
             
             length = k[0].length
-            time = _length_notation(length)
+            time = length_notation(length)
 
             if not is_rest:
                 output_chord['footer'] += time

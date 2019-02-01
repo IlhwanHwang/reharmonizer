@@ -222,7 +222,7 @@ class Note:
         return { 3: '#x', 2: 'x', 1: '#', 0: '', -1: 'b', -2: 'bb', -3: 'bbb' }[semitones]
 
 
-from singable import _length_notation
+from utils import length_notation
 
 
 class Chord:
@@ -239,7 +239,7 @@ class Chord:
         }
         # TODO: more tag represetation
         tag_string = ''.join((tag_map.get(t, '') for t in self.tags))
-        return self.base.lower() + _length_notation(length) + ((':' + tag_string) if tag_string else '')
+        return self.base.lower() + length_notation(length) + ((':' + tag_string) if tag_string else '')
 
     def to_notes(self, octave=4):
         result = { 1: Note(octave=octave, tone=self.base) }

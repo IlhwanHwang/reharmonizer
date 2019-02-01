@@ -2,40 +2,6 @@
 	\new
 	GrandStaff
 	<<
-		\chords {
-			g2
-			e4:m
-			g4
-			a1:m
-			f1:dim
-			g2
-			e2:m
-			g2
-			e4:m
-			g4
-			a1:m
-			e2:m
-			b2
-			e4:m
-			b4
-			e2:m
-			a1:m
-			a1:m
-			d2
-			d2:7
-			b4
-			b4:7
-			g4
-			e4:m
-			a1:m
-			a1:m
-			e2:m
-			c4
-			b4
-			e4:m
-			b4
-			e2:m
-		}
 		\new
 		Staff
 		{
