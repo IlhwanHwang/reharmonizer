@@ -114,19 +114,33 @@ class QKey(QLabel, NodeTarget):
 
 
 
+# class ContainerNodeEditor(QWidget):
+class ContainerNodeEditor(QLabel):
+    def __init__(self, *args, **kwargs):
+        QWidget.__init__(self, *args, **kwargs)
+        self.setGeometry(0, 360, 1280, 240)
+        self.setObjectName('node_editor')
+        self.setStyleSheet('background-color: red;')
+
+
+class ContainerNodes(QWidget):
+    def __init__(self, *args, **kwargs):
+        QWidget.__init__(self, *args, **kwargs)
+        self.setGeometry(0, 0, 1280, 360)
+        self.setObjectName('nodes')
+
+
 class Form(QWidget):
     def __init__(self, *args, **kwargs):
         QWidget.__init__(self, *args, **kwargs)
         self.setFixedSize(1280, 720)
         self.drawfuncs = []
         self.painter = QPainter()
-        self.container_node_editor = QWidget(parent=self)
-        self.container_node_editor.setGeometry(0, 360, 1280, 240)
+        self.container_node_editor = ContainerNodeEditor(parent=self)
+        self.container_nodes = ContainerNodes(parent=self)
         self.container_command_line = QCommandLine(parent=self)
         global commandline
         commandline = self.container_command_line
-        self.container_nodes = QWidget(parent=self)
-        self.container_nodes.setGeometry(0, 0, 1280, 360)
     
     def paintEvent(self, e):
         self.painter.begin(self)
@@ -138,15 +152,17 @@ class Form(QWidget):
         self.painter.begin(self)
         self.painter.eraseRect(0, 0, 1280, 720)
         self.painter.end()
+        self.hide()
+
         self.container_node_editor.close()
-        del self.container_node_editor
-        self.container_node_editor = QWidget(parent=self)
-        self.container_node_editor.setGeometry(0, 360, 1280, 240)
         self.container_nodes.close()
-        self.container_nodes = QWidget(parent=self)
-        self.container_nodes.setGeometry(0, 0, 1280, 360)
+
+        self.container_node_editor = ContainerNodeEditor(parent=self)
+        self.container_nodes = ContainerNodes(parent=self)
+
         self.drawfuncs = []
-        # self.update()
+        self.update()
+        # form.show()
 
 
 class QNodeEditor(QWidget):
@@ -206,6 +222,7 @@ class QCommandLine(QWidget):
         self.text = self.QCommandLineEdit(parent=self)
         self.history = self.QCommandLineHistory(parent=self)
         self.setGeometry(0, 600, 1280, 120)
+        self.setObjectName('command_line')
     
     def write(self, text):
         if self.text.text():
@@ -237,6 +254,9 @@ class QCommandLine(QWidget):
             node = find_node(state, cmd[1])
             node.identifier = cmd[2]
             redraw()
+        
+        elif cmd[0] == 'stop':
+            print('stopped')
 
 
 def find_node(state, identifier):
@@ -324,6 +344,7 @@ def draw(form, state):
 
     form.drawfuncs.append(draw_node_lines)
     form.update()
+    form.show()
 
 
 def play(target):
@@ -403,7 +424,7 @@ if __name__ == "__main__":
     find_node(state, 'sing:parallel').descendant = [find_node(state, 'sing:melody'), find_node(state, 'sing:transpose')]
 
     draw(form, state)
-    form.show()
+    # form.show()
     # play(find_node(state, 'parallel'))
 
     def redraw():
